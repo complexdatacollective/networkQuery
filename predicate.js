@@ -25,7 +25,7 @@ const predicate = operator =>
         return value >= other;
       case 'LESS_THAN_OR_EQUAL':
         return value <= other;
-      case 'EQUAL':
+      case 'EXACTLY':
         return isEqual(value, other);
       case 'NOT':
         return !isEqual(value, other);
