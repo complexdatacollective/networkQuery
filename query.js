@@ -48,8 +48,8 @@ const edgeRule = ({
       edge => predicate(operator)({ value: edge[attribute], other }),
     );
     // TODO: extract next two lines into reusable method, and do one for node -> edge
-    const ids = flatMap(edges, ({ from, to }) => [from, to]);
-    const nodes = filter(network.nodes, ({ id }) => includes(ids, id));
+    const uids = flatMap(edges, ({ from, to }) => [from, to]);
+    const nodes = filter(network.nodes, ({ _uid }) => includes(uids, _uid));
 
     return {
       edges,
@@ -69,10 +69,10 @@ const alterRule = ({
       sourceNodes,
       node => predicate(operator)({ value: node[attribute], other }),
     );
-    const ids = map(nodes, 'id');
+    const uids = map(nodes, '_uid');
     const edges = filter(
       network.edges,
-      ({ from, to }) => includes(ids, from) || includes(ids, to),
+      ({ from, to }) => includes(uids, from) || includes(uids, to),
     );
 
     return {
