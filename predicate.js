@@ -1,7 +1,7 @@
-import {
+const {
   isEqual,
   isNull,
-} from 'lodash';
+} = require('lodash');
 
 const operators = [
   'EXACTLY',
@@ -38,5 +38,10 @@ const predicate = operator =>
     }
   };
 
-export { operators };
-export default predicate;
+// Provides ES6 named + default imports via babel
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+
+exports.default = predicate;
+exports.operators = operators;

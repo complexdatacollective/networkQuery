@@ -1,4 +1,4 @@
-import {
+const {
   filter,
   reduce,
   includes,
@@ -6,10 +6,10 @@ import {
   flatMap,
   unionWith,
   isEqual,
-  flow as and,
-} from 'lodash';
+  flow: and,
+} = require('lodash');
 
-import predicate from './predicate';
+const predicate = require('./predicate').default;
 
 /*
 
@@ -111,10 +111,8 @@ const or = steps =>
     { ...emptyNetwork },
   );
 
-export {
-  or,
-  and,
-  alterRule,
-  egoRule,
-  edgeRule,
-};
+exports.or = or;
+exports.and = and;
+exports.alterRule = alterRule;
+exports.egoRule = egoRule;
+exports.edgeRule = edgeRule;
