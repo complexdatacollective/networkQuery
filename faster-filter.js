@@ -12,18 +12,41 @@ const buildEdgeLookup = edges =>
   }, {});
 
 /**
+ * Optimization: try to reduce the network to an ego node(s), which we can do
+ * if there are only ego rule(s), or an ego rule is ANDed with others.
+ */
+const preFilter = (network, filterLogic) => {
+  const egoRules = filterLogic.rules.filter(rule => rule.type === 'ego');
+  if (egoRules.length === 0
+    || (filterLogic.join === 'OR' && egoRules.length < filterLogic.rules.length)
+  ) {
+    return { ...network };
+  }
+  // TODO: See below; id 1 assumed to be ego for now
+  const egoNodes = network.nodes.filter(node => node.id === 1);
+  if (!egoNodes.length) {
+    // TODO: if there's an unmatching ego rule in an AND set,
+    // do we allow other rules to run or return the empty network?
+    // return { ...network };
+  }
+  return {
+    nodes: egoNodes,
+    edges: [], // TODO: Will we need to support loops?
+  };
+};
+
+/**
  * A faster filter function for large networks at the expense of
  * increased memory usage.
  *
  * Unlike the standard/documented approach, this doesn't make direct use of `query`.
- *
- * TODO: optimization: when an ego rule is included, we should run that rule first
  */
 const fasterFilter = (network, filterLogic) => {
-  const result = { nodes: [], edges: [] };
-  const edgeMap = buildEdgeLookup(network.edges);
+  const result = preFilter(network, filterLogic);
 
-  result.nodes = network.nodes.filter((node) => {
+  const edgeMap = buildEdgeLookup(result.edges);
+
+  result.nodes = result.nodes.filter((node) => {
     const ruleRunner = filterLogic.join === 'AND' ? 'every' : 'some';
     return filterLogic.rules[ruleRunner](({ options: rule, type: ruleType }) => {
       if (ruleType === 'alter' || (ruleType === 'ego' && node.id === 1)) {
@@ -41,7 +64,7 @@ const fasterFilter = (network, filterLogic) => {
     return acc;
   }, new Set());
 
-  result.edges = network.edges.filter(edge => nodeIds.has(edge.from) && nodeIds.has(edge.to));
+  result.edges = result.edges.filter(edge => nodeIds.has(edge.from) && nodeIds.has(edge.to));
 
   return result;
 };
