@@ -11,6 +11,8 @@ const {
 
 const predicate = require('./predicate').default;
 
+const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
+
 /*
 
 Premise, using additive pipes to filter network.
@@ -49,7 +51,7 @@ const edgeRule = ({
     );
     // TODO: extract next two lines into reusable method, and do one for node -> edge
     const uids = flatMap(edges, ({ from, to }) => [from, to]);
-    const nodes = filter(network.nodes, ({ _uid }) => includes(uids, _uid));
+    const nodes = filter(network.nodes, ({ [nodePrimaryKeyProperty]: uid }) => includes(uids, uid));
 
     return {
       edges,
@@ -69,7 +71,7 @@ const alterRule = ({
       sourceNodes,
       node => predicate(operator)({ value: node[attribute], other }),
     );
-    const uids = map(nodes, '_uid');
+    const uids = map(nodes, nodePrimaryKeyProperty);
     const edges = filter(
       network.edges,
       ({ from, to }) => includes(uids, from) || includes(uids, to),
