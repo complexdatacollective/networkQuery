@@ -37,6 +37,16 @@ describe('filtering', () => {
       expect(filter(network, logic).edges).toHaveLength(2);
     });
 
+    it('retains edges from ANDed edge rules', () => {
+      // p1 and p2 are both friends in the same running_club
+      const logic = makeAndLogic(
+        edgeRule({ operator: 'EXISTS', type: 'running_club' }),
+        edgeRule({ operator: 'EXISTS', type: 'friends' }),
+      );
+      expect(fasterFilter(network, logic).edges).toHaveLength(2);
+      expect(filter(network, logic).edges).toHaveLength(2);
+    });
+
     it('returns one node with ego rule', () => {
       const logic = makeAndLogic(egoRule({ attribute: 'name', operator: 'EXACTLY', value: 'Me' }));
       expect(fasterFilter(network, logic).nodes).toHaveLength(1);
