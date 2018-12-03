@@ -15,9 +15,13 @@ const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
 
 /*
 
-Premise, using additive pipes to filter network.
+AND applies filters sucessively
 
-network -> filterA -> filterB -> output;
+filterB(filterA(network)) = output;
+
+OR applies them individually and joins
+
+filterA(network) + filterB(network) = output;
 
 // PSEUDOCODE
 
