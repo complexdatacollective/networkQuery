@@ -6,6 +6,7 @@ const {
   flatMap,
   unionWith,
   isEqual,
+  first,
   flow: and,
 } = require('lodash');
 
@@ -93,7 +94,7 @@ const egoRule = ({
   value: other,
 }) =>
   (network) => {
-    const egoNode = filter(network.nodes, ['id', 1]); // `id` 1 assumed to be ego
+    const egoNode = first(filter(network.nodes, ['id', 1])); // `id` 1 assumed to be ego
     if (predicate(operator)({ value: egoNode[attribute], other })) {
       const edges = filter(network.edges, ({ from, to }) => includes([from, to], 1));
       return {
@@ -117,6 +118,30 @@ const or = steps =>
     { ...emptyNetwork },
   );
 
+/**
+ * Performing a query may result in orphan nodes/edges.
+ *
+ * It is assumed that the querent will want the complete
+ * network for the remaining nodes. This reinstates *all*
+ * edges associated with those nodes, including those
+ * which may have previously been removed.
+ */
+const repair = (query) =>
+  (network) => {
+    const result = query(network);
+    const uids = map(result.nodes, nodePrimaryKeyProperty);
+    const edges = filter(
+      network.edges,
+      ({ from, to }) => includes(uids, from) && includes(uids, to),
+    );
+    return {
+      nodes: result.nodes,
+      edges,
+    };
+  }
+
+
+exports.repair = repair;
 exports.or = or;
 exports.and = and;
 exports.alterRule = alterRule;
