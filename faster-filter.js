@@ -1,16 +1,40 @@
 const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
 const nodeAttributesProperty = require('./nodeAttributesProperty');
+const buildEdgeLookup = require('./buildEdgeLookup');
 const predicate = require('./predicate').default;
 
-const buildEdgeLookup = edges =>
-  edges.reduce((acc, edge) => {
-    // Looks like we only care about type membership right now (not from/to)
-    // (this matches the documented filter definitions)
-    acc[edge.type] = acc[edge.type] || new Set();
-    acc[edge.type].add(edge.from);
-    acc[edge.type].add(edge.to);
-    return acc;
-  }, {});
+const alterRule = (rule, node) => {
+  if (!rule.attribute) {
+    switch (rule. operator) {
+      case 'EXISTS':
+        return node.type === rule.type;
+      default:
+        return node.type != rule.type;
+    }
+  }
+
+  return predicate(rule.operator)({
+    value: node[nodeAttributesProperty][rule.attribute],
+    other: rule.value
+  });
+}
+
+const edgeRule = (rule, node, edgeMap) => (
+  rule.operator === 'EXISTS' ?
+    edgeMap[rule.type] && edgeMap[rule.type].has(node[nodePrimaryKeyProperty]) :
+    !edgeMap[rule.type] || !edgeMap[rule.type].has(node[nodePrimaryKeyProperty])
+);
+
+const getRuleForType = (type) => {
+  switch(type) {
+    case 'alter':
+      return alterRule;
+    case 'edge':
+      return edgeRule;
+    default:
+      return () => false;
+  }
+}
 
 /**
  * A faster filter function for large networks at the expense of
@@ -24,23 +48,9 @@ const fasterFilter = (network, filterLogic) => {
   const nodes = network.nodes.filter((node) => {
     const ruleRunner = filterLogic.join === 'AND' ? 'every' : 'some';
 
-    return filterLogic.rules[ruleRunner](({ options: rule, type: ruleType }) => {
-      switch(ruleType) {
-        case 'alter':
-          return predicate(rule.operator)({
-            value: node[nodeAttributesProperty][rule.attribute],
-            other: rule.value
-          });
-        case 'edge':
-          return (
-            rule.operator === 'EXISTS' ?
-              edgeMap[rule.type] && edgeMap[rule.type].has(node[nodePrimaryKeyProperty]) :
-              !edgeMap[rule.type] || !edgeMap[rule.type].has(node[nodePrimaryKeyProperty])
-          );
-        default:
-          return false;
-      }
-    });
+    return filterLogic.rules[ruleRunner](
+      ({ options, type: ruleType }) => getRuleForType(ruleType)(options, node, edgeMap),
+    );
   });
 
   const nodeIds = nodes.reduce((acc, node) => {
@@ -56,5 +66,4 @@ const fasterFilter = (network, filterLogic) => {
   };
 };
 
-exports.buildEdgeLookup = buildEdgeLookup;
 exports.fasterFilter = fasterFilter;

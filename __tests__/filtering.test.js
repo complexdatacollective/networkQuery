@@ -14,20 +14,22 @@ const makeAndLogic = (...rules) => ({ join: 'AND', rules });
 const alterRule = options => ({ options, type: 'alter' });
 const edgeRule = options => ({ options, type: 'edge' });
 
-describe('filtering', () => {
-  let personId = 0;
-  const person = (attributes) => {
-    personId += 1;
-    return { _uid: personId, type: 'person', [nodeAttributesProperty]: attributes };
-  };
+let nodeId = 0;
 
+const node = (attributes, type = 'person') => {
+  nodeId += 1;
+  return { _uid: nodeId, type, [nodeAttributesProperty]: attributes };
+};
+
+describe('filtering', () => {
   describe('a simple network', () => {
     const network = Object.freeze({
       nodes: [
-        person({ name: 'Jimmy' }),
-        person({ name: 'Carl' }),
-        person({ name: 'William' }),
-        person({ name: 'Theodore' }),
+        node({ name: 'Jimmy' }),
+        node({ name: 'Carl' }),
+        node({ name: 'William' }),
+        node({ name: 'Theodore' }),
+        node({ name: 'The Mall' }, 'place'),
       ],
       edges: [
         { from: 1, to: 2, type: 'friends' },
@@ -58,6 +60,19 @@ describe('filtering', () => {
       );
       expect(fasterFilter(network, logic).nodes).toHaveLength(1);
       expect(filter(network, logic).nodes).toHaveLength(1);
+    });
+
+    it('can query alter by type', () => {
+      const logic = makeAndLogic(
+        alterRule({ operator: 'EXISTS', type: 'place' })
+      );
+      const inverseLogic = makeAndLogic(
+        alterRule({ operator: 'NOT_EXISTS', type: 'place' })
+      );
+      expect(fasterFilter(network, logic).nodes).toHaveLength(1);
+      expect(fasterFilter(network, inverseLogic).nodes).toHaveLength(4);
+      expect(filter(network, logic).nodes).toHaveLength(1);
+      expect(filter(network, inverseLogic).nodes).toHaveLength(4);
     });
 
     it('returns no edges when only one node present', () => {

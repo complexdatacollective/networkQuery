@@ -1,10 +1,6 @@
-const {
-  includes,
-  map,
-} = require('lodash');
-
+const { map } = require('lodash');
 const predicate = require('./predicate').default;
-const buildEdgeLookup = require('./faster-filter').buildEdgeLookup;
+const buildEdgeLookup = require('./buildEdgeLookup');
 const nodeAttributesProperty = require('./nodeAttributesProperty');
 const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
 
@@ -32,11 +28,14 @@ const edgeRule = ({
   operator,
   value: other,
 }) => {
-  const rule = (node, edgeMap) => (
-    operator === 'EXISTS' ?
-      edgeMap[type] && edgeMap[type].has(node[nodePrimaryKeyProperty]) :
-      !edgeMap[type] || !edgeMap[type].has(node[nodePrimaryKeyProperty])
-  );
+  const rule = (node, edgeMap) => {
+    switch (operator) {
+      case 'EXISTS':
+        return edgeMap[type] && edgeMap[type].has(node[nodePrimaryKeyProperty]);
+      default:
+        return !edgeMap[type] || !edgeMap[type].has(node[nodePrimaryKeyProperty])
+    }
+  };
   rule.type = 'edge';
   return rule;
 }
@@ -47,20 +46,31 @@ const alterRule = ({
   operator,
   value: other,
 }) => {
-  const rule = node => node.type === type && predicate(operator)({
-    value: node[nodeAttributesProperty][attribute],
-    other,
-  });
+  const rule = node => {
+    if (!attribute) {
+      switch (operator) {
+        case 'EXISTS':
+          return node.type === type;
+        default:
+          return node.type != type;
+      }
+    }
+
+    return node.type === type && predicate(operator)({
+      value: node[nodeAttributesProperty][attribute],
+      other,
+    });
+  }
   rule.type = 'alter';
   return rule;
 }
 
 // remove orphaned edges
 const trimEdges = (network) => {
-  const uids = map(network.nodes, nodePrimaryKeyProperty);
+  const uids = new Set(map(network.nodes, nodePrimaryKeyProperty));
 
   const edges = network.edges.filter(
-    ({ from, to }) => includes(uids, from) && includes(uids, to),
+    ({ from, to }) => uids.has(from) && uids.has(to),
   );
 
   return {
