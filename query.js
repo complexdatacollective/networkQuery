@@ -5,7 +5,7 @@ const {
 
 const predicate = require('./predicate').default;
 const buildEdgeLookup = require('./faster-filter').buildEdgeLookup;
-
+const nodeAttributesProperty = require('./nodeAttributesProperty');
 const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
 
 /*
@@ -32,10 +32,10 @@ const edgeRule = ({
   operator,
   value: other,
 }) => {
-  const rule = (edgeMap, nodeId) => (
+  const rule = (node, edgeMap) => (
     operator === 'EXISTS' ?
-      edgeMap[type] && edgeMap[type].has(nodeId) :
-      !edgeMap[type] || !edgeMap[type].has(nodeId)
+      edgeMap[type] && edgeMap[type].has(node[nodePrimaryKeyProperty]) :
+      !edgeMap[type] || !edgeMap[type].has(node[nodePrimaryKeyProperty])
   );
   rule.type = 'edge';
   return rule;
@@ -47,7 +47,10 @@ const alterRule = ({
   operator,
   value: other,
 }) => {
-  const rule = node => node.type === type && predicate(operator)({ value: node[attribute], other });
+  const rule = node => node.type === type && predicate(operator)({
+    value: node[nodeAttributesProperty][attribute],
+    other,
+  });
   rule.type = 'alter';
   return rule;
 }
@@ -72,10 +75,7 @@ const join = joinType =>
       const edgeMap = buildEdgeLookup(network.edges);
 
       const nodes =  network.nodes.filter(
-        node =>
-          rules[joinType](rule => (
-            rule.type === 'edge' ? rule(edgeMap, node[nodePrimaryKeyProperty]) : rule(node)
-          )),
+        node => rules[joinType](rule => rule(node, edgeMap)),
       );
 
       return trimEdges({

@@ -1,6 +1,7 @@
 /* eslint-env jest */
 const query = require('../query');
 const fasterFilter = require('../faster-filter').fasterFilter;
+const nodeAttributesProperty = require('../nodeAttributesProperty');
 
 // construction from https://github.com/codaco/Network-Canvas/wiki/Network-Query-Builder
 const makeFilter = logic =>
@@ -15,14 +16,19 @@ const edgeRule = options => ({ options, type: 'edge' });
 
 describe('filtering', () => {
   let personId = 0;
-  const person = (name) => {
+  const person = (attributes) => {
     personId += 1;
-    return { name, _uid: personId, id: personId, type: 'person' };
+    return { _uid: personId, type: 'person', [nodeAttributesProperty]: attributes };
   };
 
   describe('a simple network', () => {
     const network = Object.freeze({
-      nodes: [person('Jimmy'), person('Carl'), person('William'), person('Theodore')],
+      nodes: [
+        person({ name: 'Jimmy' }),
+        person({ name: 'Carl' }),
+        person({ name: 'William' }),
+        person({ name: 'Theodore' }),
+      ],
       edges: [
         { from: 1, to: 2, type: 'friends' },
         { from: 1, to: 2, type: 'running_club' },

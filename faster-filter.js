@@ -1,4 +1,5 @@
 const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
+const nodeAttributesProperty = require('./nodeAttributesProperty');
 const predicate = require('./predicate').default;
 
 const buildEdgeLookup = edges =>
@@ -26,7 +27,10 @@ const fasterFilter = (network, filterLogic) => {
     return filterLogic.rules[ruleRunner](({ options: rule, type: ruleType }) => {
       switch(ruleType) {
         case 'alter':
-          return predicate(rule.operator)({ value: node[rule.attribute], other: rule.value });
+          return predicate(rule.operator)({
+            value: node[nodeAttributesProperty][rule.attribute],
+            other: rule.value
+          });
         case 'edge':
           return (
             rule.operator === 'EXISTS' ?
