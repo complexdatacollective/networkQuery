@@ -23,14 +23,18 @@ describe('filtering', () => {
 
   describe('a simple network', () => {
     const network = Object.freeze({
-      nodes: [person('Me'), person('Carl')],
-      edges: [{ from: 1, to: 2, type: 'friends' }],
+      nodes: [person('Me'), person('Carl'), person('Theodore')],
+      edges: [
+        { from: 1, to: 2, type: 'friends' },
+        { from: 1, to: 2, type: 'running_club' },
+        { from: 1, to: 3, type: 'friends' },
+      ],
     });
 
-    it('returns one edge', () => {
-      const logic = makeOrLogic(edgeRule({ operator: 'EXISTS', type: 'friends' }));
-      expect(fasterFilter(network, logic).edges).toHaveLength(1);
-      expect(filter(network, logic).edges).toHaveLength(1);
+    it('edge rule is node centric, missing edges are reinstated', () => {
+      const logic = makeOrLogic(edgeRule({ operator: 'EXISTS', type: 'running_club' }));
+      expect(fasterFilter(network, logic).edges).toHaveLength(2);
+      expect(filter(network, logic).edges).toHaveLength(2);
     });
 
     it('returns one node with ego rule', () => {
