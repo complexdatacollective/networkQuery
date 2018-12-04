@@ -7,10 +7,10 @@ const {
   unionWith,
   isEqual,
   first,
-  flow: and,
 } = require('lodash');
 
 const predicate = require('./predicate').default;
+const buildEdgeLookup = require('./faster-filter').buildEdgeLookup;
 
 const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
 
@@ -26,14 +26,14 @@ filterA(network) + filterB(network) = output;
 
 // PSEUDOCODE
 
-alter('type', 'attribute', 'operator', 'value')(edges('type')(network))
+join([alter('type', 'attribute', 'operator', 'value'), (edges('type')])(network)
 
-alter('person', 'age', '>', 29)(edges('friends')(network))
+or([alter('person', 'age', '>', 29), edges('friends')])(network)
 
-compose(
+or([
   edges('friends'),
   alter('person', 'age', '>', 29),
-)(network);
+])(network);
 
 */
 
@@ -44,106 +44,112 @@ const emptyNetwork = {
 
 const edgeRule = ({
   type,
-  attribute,
+  attribute, // Unsupported
   operator,
   value: other,
-}) =>
-  (network) => {
-    const sourceEdges = filter(network.edges, ['type', type]);
-    const edges = filter(
-      sourceEdges,
-      edge => predicate(operator)({ value: edge[attribute], other }),
-    );
-    // TODO: extract next two lines into reusable method, and do one for node -> edge
-    const uids = flatMap(edges, ({ from, to }) => [from, to]);
-    const nodes = filter(network.nodes, ({ [nodePrimaryKeyProperty]: uid }) => includes(uids, uid));
-
-    return {
-      edges,
-      nodes,
-    };
-  };
+}) => {
+  const rule = (edgeMap, nodeId) => (
+    operator === 'EXISTS' ?
+      edgeMap[type] && edgeMap[type].has(nodeId) :
+      !edgeMap[type] || !edgeMap[type].has(nodeId)
+  );
+  rule.type = 'edge';
+  return rule;
+}
 
 const alterRule = ({
   type,
   attribute,
   operator,
   value: other,
-}) =>
-  (network) => {
-    const sourceNodes = attribute ? filter(network.nodes, ['type', type]) : network.nodes;
-    const nodes = filter(
-      sourceNodes,
-      node => predicate(operator)({ value: node[attribute], other }),
-    );
-    const uids = map(nodes, nodePrimaryKeyProperty);
-    const edges = filter(
-      network.edges,
-      ({ from, to }) => includes(uids, from) || includes(uids, to),
-    );
-
-    return {
-      nodes,
-      edges,
-    };
-  };
+}) => {
+  const rule = node => node.type === type && predicate(operator)({ value: node[attribute], other });
+  rule.type = 'alter';
+  return rule;
+}
 
 const egoRule = ({
   attribute,
   operator,
   value: other,
-}) =>
-  (network) => {
-    const egoNode = first(filter(network.nodes, ['id', 1])); // `id` 1 assumed to be ego
-    if (predicate(operator)({ value: egoNode[attribute], other })) {
-      const edges = filter(network.edges, ({ from, to }) => includes([from, to], 1));
-      return {
-        nodes: [egoNode],
-        edges,
-      };
-    }
-    return { ...emptyNetwork };
-  };
+}) => {
+  const rule = node => node.id === 1 && predicate(operator)({ value: node[attribute], other });
+  rule.type = 'ego';
+  return rule;
+}
 
-const or = steps =>
-  network => reduce(
-    steps,
-    (memo, step) => {
-      const result = step(network);
-      return ({
-        nodes: unionWith(memo.nodes, result.nodes, isEqual),
-        edges: unionWith(memo.edges, result.edges, isEqual),
-      });
-    },
-    { ...emptyNetwork },
+const trimEdges = network =>
+  repairEdges(network, network);
+
+const repairEdges = (fullNetwork, partialNetwork) => {
+  const uids = map(partialNetwork.nodes, nodePrimaryKeyProperty);
+
+  const edges = filter(
+    fullNetwork.edges,
+    ({ from, to }) => includes(uids, from) && includes(uids, to),
   );
 
-/**
- * Performing a query may result in orphan nodes/edges.
- *
- * It is assumed that the querent will want the complete
- * network for the remaining nodes. This reinstates *all*
- * edges associated with those nodes, including those
- * which may have previously been removed.
- */
-const repair = (query) =>
-  (network) => {
-    const result = query(network);
-    const uids = map(result.nodes, nodePrimaryKeyProperty);
-    const edges = filter(
-      network.edges,
-      ({ from, to }) => includes(uids, from) && includes(uids, to),
+  return {
+    nodes: partialNetwork.nodes,
+    edges,
+  };
+}
+
+const or = rules =>
+  network => {
+    const edgeMap = buildEdgeLookup(network.edges);
+
+    const nodes = network.nodes.filter(
+      node =>
+        rules.some(rule => (
+          rule.type === 'edge' ? rule(edgeMap, node[nodePrimaryKeyProperty]) : rule(node)
+        )),
     );
-    return {
-      nodes: result.nodes,
-      edges,
-    };
-  }
 
+    return trimEdges({
+      ...network,
+      nodes,
+    });
+  };
 
-exports.repair = repair;
+const and = rules =>
+  network => {
+    const edgeMap = buildEdgeLookup(network.edges);
+
+    const nodes = network.nodes.filter(
+      node =>
+        rules.every(rule => (
+          rule.type === 'edge' ? rule(edgeMap, node[nodePrimaryKeyProperty]) : rule(node)
+        )),
+    );
+
+    return trimEdges({
+      ...network,
+      nodes,
+    });
+  };
+
+// acts like previous 'and' network
+const step = rules =>
+  network => {
+    rules.reduce((memo, rule) => {
+      const edgeMap = buildEdgeLookup(memo.edges);
+
+      const nodes = memo.nodes.filter(
+        node => rule.type === 'edge' ? rule(edgeMap, node[nodePrimaryKeyProperty]) : rule(node),
+      );
+
+      return repairEdges(
+        network,
+        { nodes }
+      );
+    },
+    { ...network });
+  };
+
 exports.or = or;
 exports.and = and;
+exports.step = step; // previously 'and'
 exports.alterRule = alterRule;
 exports.egoRule = egoRule;
 exports.edgeRule = edgeRule;

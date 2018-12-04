@@ -5,7 +5,7 @@ const fasterFilter = require('../faster-filter').fasterFilter;
 // construction from https://github.com/codaco/Network-Canvas/wiki/Network-Query-Builder
 const makeFilter = logic =>
   query[logic.join.toLowerCase()](logic.rules.map(rule => query[`${rule.type}Rule`](rule.options)));
-const filter = (network, logic) => query.repair(makeFilter(logic))(network);
+const filter = (network, logic) => makeFilter(logic)(network);
 
 const makeOrLogic = (...rules) => ({ join: 'OR', rules });
 const makeAndLogic = (...rules) => ({ join: 'AND', rules });

@@ -69,4 +69,5 @@ const fasterFilter = (network, filterLogic) => {
   return result;
 };
 
+exports.buildEdgeLookup = buildEdgeLookup;
 exports.fasterFilter = fasterFilter;
