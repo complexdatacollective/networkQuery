@@ -12,7 +12,6 @@ const makeAndLogic = (...rules) => ({ join: 'AND', rules });
 
 const alterRule = options => ({ options, type: 'alter' });
 const edgeRule = options => ({ options, type: 'edge' });
-const egoRule = options => ({ options, type: 'ego' });
 
 describe('filtering', () => {
   let personId = 0;
@@ -23,46 +22,40 @@ describe('filtering', () => {
 
   describe('a simple network', () => {
     const network = Object.freeze({
-      nodes: [person('Me'), person('Carl'), person('Theodore')],
+      nodes: [person('Jimmy'), person('Carl'), person('William'), person('Theodore')],
       edges: [
         { from: 1, to: 2, type: 'friends' },
         { from: 1, to: 2, type: 'running_club' },
         { from: 1, to: 3, type: 'friends' },
+        { from: 3, to: 4, type: 'band_members' },
       ],
     });
 
-    it('edge rule is node centric, missing edges are reinstated', () => {
+    it('edge rule is node centric and orphaned edges are trimmed', () => {
       const logic = makeOrLogic(edgeRule({ operator: 'EXISTS', type: 'running_club' }));
       expect(fasterFilter(network, logic).edges).toHaveLength(2);
       expect(filter(network, logic).edges).toHaveLength(2);
     });
 
-    it('returns one node with ego rule', () => {
-      const logic = makeAndLogic(egoRule({ attribute: 'name', operator: 'EXACTLY', value: 'Me' }));
-      expect(fasterFilter(network, logic).nodes).toHaveLength(1);
-      expect(filter(network, logic).nodes).toHaveLength(1);
-    });
-
-    it('returns no nodes based on ego not matching', () => {
-      const logic = makeAndLogic(egoRule({ attribute: 'name', operator: 'EXACTLY', value: 'NotMe' }));
-      expect(fasterFilter(network, logic).nodes).toHaveLength(0);
-      expect(filter(network, logic).nodes).toHaveLength(0);
+    it('edge rules support NOT_EXISTS', () => {
+      const logic = makeAndLogic(
+        edgeRule({ operator: 'EXISTS', type: 'friends' }),
+        edgeRule({ operator: 'NOT_EXISTS', type: 'band_members' }),
+      );
+      expect(fasterFilter(network, logic).edges).toHaveLength(2);
+      expect(filter(network, logic).nodes).toHaveLength(2);
     });
 
     it('returns one node based on alter name', () => {
-      const logic = makeAndLogic(alterRule({ attribute: 'name', operator: 'EXACTLY', value: 'Carl', type: 'person' }));
+      const logic = makeAndLogic(
+        alterRule({ attribute: 'name', operator: 'EXACTLY', value: 'Carl', type: 'person' })
+      );
       expect(fasterFilter(network, logic).nodes).toHaveLength(1);
       expect(filter(network, logic).nodes).toHaveLength(1);
     });
 
     it('returns no edges when only one node present', () => {
       const logic = makeAndLogic(alterRule({ attribute: '_uid', operator: 'EXACTLY', value: 1, type: 'person' }));
-      expect(fasterFilter(network, logic).edges).toHaveLength(0);
-      expect(filter(network, logic).edges).toHaveLength(0);
-    });
-
-    it('returns no edges when only an ego node present', () => {
-      const logic = makeAndLogic(egoRule({ attribute: '_uid', operator: 'EXACTLY', value: 1, type: 'person' }));
       expect(fasterFilter(network, logic).edges).toHaveLength(0);
       expect(filter(network, logic).edges).toHaveLength(0);
     });
