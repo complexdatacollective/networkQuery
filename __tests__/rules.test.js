@@ -1,19 +1,9 @@
 /* eslint-env jest */
-const nodeAttributesProperty = require('../nodeAttributesProperty');
 const buildEdgeLookup = require('../buildEdgeLookup');
-const getRule = require('../rules').getRule;
-
-let nodeId = 0;
-
-const generateNode = (attributes, type = 'person') => {
-  nodeId += 1;
-  return { _uid: nodeId, type, [nodeAttributesProperty]: attributes };
-};
-
-const generateRuleConfig = (type, options) => ({
-  type,
-  options
-});
+const getRule = require('../rules').default;
+const helpers = require('./helpers');
+const generateNode = helpers.getNodeGenerator();
+const generateRuleConfig = helpers.generateRuleConfig;
 
 const nodes = [
   generateNode({ name: 'William', age: 19 }),

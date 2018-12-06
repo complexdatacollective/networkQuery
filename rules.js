@@ -40,4 +40,4 @@ const getRule = (ruleConfig) => {
   }
 }
 
-exports.getRule = getRule;
+exports.default = getRule;

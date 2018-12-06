@@ -1,6 +1,4 @@
 const filter = ({ rules, join }) =>
-  network => {
-    // join as running
-  };
+  network => network;
 
-export default filter;
+exports.default = filter;
