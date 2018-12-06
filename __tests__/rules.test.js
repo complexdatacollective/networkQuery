@@ -15,9 +15,9 @@ const generateRuleConfig = (type, options) => ({
 });
 
 const nodes = [
-  generateNode({ name: 'William' }),
-  generateNode({ name: 'Theodore' }),
-  generateNode({ name: 'Rufus' }),
+  generateNode({ name: 'William', age: 19 }),
+  generateNode({ name: 'Theodore', age: 18 }),
+  generateNode({ name: 'Rufus', age: 51 }),
   generateNode({ name: 'Phone Box' }, 'public_utility'),
 ];
 
@@ -49,8 +49,7 @@ describe('rules', () => {
     });
 
     describe('attribute rules', () => {
-      it('EXACTLY', () => {
-        const ruleConfig =
+      const generateAttributeRuleConfig = config =>
         generateRuleConfig(
           'alter',
           {
@@ -58,8 +57,12 @@ describe('rules', () => {
             operator: 'EXACTLY',
             attribute: 'name',
             value: 'William',
+            ...config,
           }
         );
+
+      it('EXACTLY', () => {
+        const ruleConfig = generateAttributeRuleConfig({ operator: 'EXACTLY' });
 
         const rule = getRule(ruleConfig);
         const matches = nodes.filter(rule);
@@ -67,16 +70,55 @@ describe('rules', () => {
       });
 
       it('NOT', () => {
-        const ruleConfig =
-        generateRuleConfig(
-          'alter',
-          {
-            type: 'person',
-            operator: 'NOT',
-            attribute: 'name',
-            value: 'William',
-          }
-        );
+        const ruleConfig = generateAttributeRuleConfig({ operator: 'NOT' });
+
+        const rule = getRule(ruleConfig);
+        const matches = nodes.filter(rule);
+        expect(matches.length).toEqual(2);
+      });
+
+      it('GREATER_THAN', () => {
+        const ruleConfig = generateAttributeRuleConfig({
+          attribute: 'age',
+          operator: 'GREATER_THAN',
+          value: 19,
+        });
+
+        const rule = getRule(ruleConfig);
+        const matches = nodes.filter(rule);
+        expect(matches.length).toEqual(1);
+      });
+
+      it('LESS_THAN', () => {
+        const ruleConfig = generateAttributeRuleConfig({
+          attribute: 'age',
+          operator: 'LESS_THAN',
+          value: 19,
+        });
+
+        const rule = getRule(ruleConfig);
+        const matches = nodes.filter(rule);
+        expect(matches.length).toEqual(1);
+      });
+
+    it('GREATER_THAN_OR_EQUAL', () => {
+        const ruleConfig = generateAttributeRuleConfig({
+          attribute: 'age',
+          operator: 'GREATER_THAN_OR_EQUAL',
+          value: 19,
+        });
+
+        const rule = getRule(ruleConfig);
+        const matches = nodes.filter(rule);
+        expect(matches.length).toEqual(2);
+      });
+
+      it('LESS_THAN_OR_EQUAL', () => {
+        const ruleConfig = generateAttributeRuleConfig({
+          attribute: 'age',
+          operator: 'LESS_THAN_OR_EQUAL',
+          value: 19,
+        });
 
         const rule = getRule(ruleConfig);
         const matches = nodes.filter(rule);

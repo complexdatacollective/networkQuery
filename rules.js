@@ -1,7 +1,7 @@
 const nodeAttributesProperty = require('./nodeAttributesProperty');
 const predicate = require('./predicate').default;
 
-const alterRule = ({ attribute, operator, type, value }) =>
+const alterRule = ({ attribute, operator, type, value: other }) =>
   (node) => {
     if (!attribute) {
       switch (operator) {
@@ -13,8 +13,8 @@ const alterRule = ({ attribute, operator, type, value }) =>
     }
 
     return node.type === type && predicate(operator)({
-      value,
-      other: node[nodeAttributesProperty][attribute],
+      value: node[nodeAttributesProperty][attribute],
+      other,
     });
   };
 
