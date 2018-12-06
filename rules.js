@@ -11,6 +11,11 @@ const alterRule = ({ attribute, operator, type, value }) =>
           return node.type != type;
       }
     }
+
+    return node.type === type && predicate(operator)({
+      value,
+      other: node[nodeAttributesProperty][attribute],
+    });
   };
 
 const getRule = (ruleConfig) => {
