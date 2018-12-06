@@ -1,10 +1,16 @@
 /* eslint-env jest */
 const getQuery = require('../query').default;
+const nodeAttributesProperty = require('../nodeAttributesProperty');
 const helpers = require('./helpers');
 const generateNode = helpers.getNodeGenerator();
 const generateRuleConfig = helpers.generateRuleConfig;
 
 const network = {
+  ego: {
+    [nodeAttributesProperty]: {
+      age: 20,
+    },
+  },
   nodes: [
     generateNode({ name: 'William', age: 19, favouriteColor: 'green' }),
     generateNode({ name: 'Theodore', age: 18, favouriteColor: 'red' }),
@@ -21,7 +27,7 @@ const network = {
 
 describe('query', () => {
   describe('single rule', () => {
-    it('nodes match the rule', () => {
+    it('returns a boolean', () => {
       const queryConfig = {
         rules: [
           generateRuleConfig('alter', {
@@ -30,8 +36,8 @@ describe('query', () => {
             attribute: 'age',
             value: 20,
           }, {
-            operator: 'GREATER_THAN_OR_EQUAL_TO',
-            value: 2,
+            operator: 'GREATER_THAN',
+            value: 1,
           }),
         ],
         join: 'OR',
@@ -40,6 +46,64 @@ describe('query', () => {
       const query = getQuery(queryConfig);
       const result = query(network);
       expect(result).toEqual(true);
+    });
+  });
+
+  describe('OR', () => {
+    const queryConfig = {
+      rules: [
+        generateRuleConfig('alter', {
+          type: 'person',
+          operator: 'LESS_THAN',
+          attribute: 'age',
+          value: 20,
+        }, {
+          operator: 'GREATER_THAN',
+          value: 3,
+        }),
+        generateRuleConfig('ego', {
+          operator: 'EXACTLY',
+          attribute: 'age',
+          value: 20,
+        }),
+      ],
+      join: 'OR',
+    }
+
+    const query = getQuery(queryConfig);
+
+    it('results are summed with OR', () => {
+      const result = query(network);
+      expect(result).toEqual(true);
+    });
+  });
+
+  describe('AND', () => {
+    const queryConfig = {
+      rules: [
+        generateRuleConfig('alter', {
+          type: 'person',
+          operator: 'LESS_THAN',
+          attribute: 'age',
+          value: 20,
+        }, {
+          operator: 'GREATER_THAN',
+          value: 3,
+        }),
+        generateRuleConfig('ego', {
+          operator: 'EXACTLY',
+          attribute: 'age',
+          value: 20,
+        }),
+      ],
+      join: 'AND',
+    }
+
+    const query = getQuery(queryConfig);
+
+    it('results are summed with AND', () => {
+      const result = query(network);
+      expect(result).toEqual(false);
     });
   });
 });

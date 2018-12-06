@@ -1,29 +1,26 @@
 const buildEdgeLookup = require('./buildEdgeLookup');
 const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
 const getRule = require('./rules').default;
+const predicate = require('./predicate').default;
 
 const query = ({ rules, join }) => {
-  const ruleRunners = rules.map(getRule);
+  const joinType = join === 'AND' ? 'every' : 'some'; // use the built-in methods
 
   return (network) => {
-    const joinType = join === 'AND' ? 'every' : 'some'; // use the built-in methods
-
     const edgeMap = buildEdgeLookup(network.edges);
 
-    ruleRunners.reduce(rule => {
+    return rules[joinType](({ count, ...ruleConfig }) => {
+      const rule = getRule(ruleConfig);
 
+      // we don't perform count on ego rules
+      if (ruleConfig.type === 'ego') { return rule(network.ego); }
+
+      const nodes = network.nodes.filter(
+        node => rule(node, edgeMap),
+      );
+
+      return predicate(count.operator)({ value: nodes.length, other: count.value });
     });
-
-    // const nodes =  network.nodes.filter(
-    //   node => [joinType](rule => rule(node, edgeMap)),
-    // );
-
-    // return trimEdges({
-    //   ...network,
-    //   nodes,
-    // });
-
-    return false;
   };
 };
 

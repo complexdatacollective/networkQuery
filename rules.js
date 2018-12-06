@@ -29,14 +29,23 @@ const alterRule = ({ attribute, operator, type, value: other }) =>
     });
   };
 
+const egoRule = ({ attribute, operator, value: other }) =>
+  node =>
+    predicate(operator)({
+      value: node[nodeAttributesProperty][attribute],
+      other,
+    });
+
 const getRule = (ruleConfig) => {
   switch(ruleConfig.type) {
     case 'alter':
       return alterRule(ruleConfig.options);
     case 'edge':
       return edgeRule(ruleConfig.options);
+    case 'ego':
+      return egoRule(ruleConfig.options);
     default:
-      return () => true;
+      return () => false;
   }
 }
 
