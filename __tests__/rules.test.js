@@ -1,5 +1,6 @@
 /* eslint-env jest */
 const nodeAttributesProperty = require('../nodeAttributesProperty');
+const buildEdgeLookup = require('../buildEdgeLookup');
 const getRule = require('../rules').getRule;
 
 let nodeId = 0;
@@ -21,15 +22,24 @@ const nodes = [
   generateNode({ name: 'Phone Box' }, 'public_utility'),
 ];
 
+const edges = [
+  { from: 1, to: 2, type: 'friend' },
+  { from: 2, to: 3, type: 'friend' },
+  { from: 1, to: 3, type: 'friend' },
+  { from: 1, to: 2, type: 'band' },
+];
+
+const edgeMap = buildEdgeLookup(edges);
+
 describe('rules', () => {
   it('getRule() returns a function', () => {
     const rule = getRule({});
 
-    expect(typeof rule).toHaveReturned
+    expect(typeof rule).toEqual('function');
   });
 
 
-  describe('alter rule', () => {
+  describe('alter rules', () => {
     describe('type rules', () => {
       it('EXISTS', () => {
         const ruleConfig = generateRuleConfig('alter', { type: 'person', operator: 'EXISTS' });
@@ -124,6 +134,24 @@ describe('rules', () => {
         const matches = nodes.filter(rule);
         expect(matches.length).toEqual(2);
       });
+    });
+  });
+
+  describe('edge rules', () => {
+    it('EXISTS', () => {
+      const ruleConfig = generateRuleConfig('edge', { type: 'friend', operator: 'EXISTS' });
+
+      const rule = getRule(ruleConfig);
+      const matches = nodes.filter(node => rule(node, edgeMap));
+      expect(matches.length).toEqual(3);
+    });
+
+    it('NOT_EXISTS', () => {
+      const ruleConfig = generateRuleConfig('edge', { type: 'friend', operator: 'NOT_EXISTS' })
+
+      const rule = getRule(ruleConfig);
+      const matches = nodes.filter(node => rule(node, edgeMap));
+      expect(matches.length).toEqual(1);
     });
   });
 });

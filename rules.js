@@ -1,5 +1,16 @@
 const nodeAttributesProperty = require('./nodeAttributesProperty');
+const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
 const predicate = require('./predicate').default;
+
+const edgeRule = ({ operator, type }) =>
+  (node, edgeMap) => {
+    switch (operator) {
+      case 'EXISTS':
+        return edgeMap[type] && edgeMap[type].has(node[nodePrimaryKeyProperty]);
+      default:
+        return !edgeMap[type] || !edgeMap[type].has(node[nodePrimaryKeyProperty])
+    }
+  };
 
 const alterRule = ({ attribute, operator, type, value: other }) =>
   (node) => {
@@ -22,8 +33,10 @@ const getRule = (ruleConfig) => {
   switch(ruleConfig.type) {
     case 'alter':
       return alterRule(ruleConfig.options);
+    case 'edge':
+      return edgeRule(ruleConfig.options);
     default:
-      () => true;
+      return () => true;
   }
 }
 
