@@ -67,4 +67,9 @@ const filter = ({ rules, join }) => {
   };
 }
 
+// Provides ES6 named + default imports via babel
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
+
 exports.default = filter;
