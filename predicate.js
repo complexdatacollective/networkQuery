@@ -3,6 +3,7 @@ const {
   isNull,
 } = require('lodash');
 
+// operators list
 const operators = {
   EXACTLY: 'EXACTLY',
   EXISTS: 'EXISTS',
@@ -14,6 +15,17 @@ const operators = {
   LESS_THAN_OR_EQUAL: 'LESS_THAN_OR_EQUAL',
 };
 
+/**
+ * returns functions that can be used to compare `value` with `other`
+ *
+ * @param {string} operator One of the operators from the operators list.
+ *
+ * Usage:
+ *
+ * ```
+ * predicate('GREATER_THAN')({ value: 2, other: 1 }); // returns true
+ * ```
+ */
 const predicate = operator =>
   ({ value, other }) => {
     switch (operator) {
