@@ -3,35 +3,35 @@ const {
   isNull,
 } = require('lodash');
 
-const operators = [
-  'EXACTLY',
-  'EXISTS',
-  'NOT_EXISTS',
-  'NOT',
-  'GREATER_THAN',
-  'GREATER_THAN_OR_EQUAL',
-  'LESS_THAN',
-  'LESS_THAN_OR_EQUAL',
-];
+const operators = {
+  EXACTLY: 'EXACTLY',
+  EXISTS: 'EXISTS',
+  NOT_EXISTS: 'NOT_EXISTS',
+  NOT: 'NOT',
+  GREATER_THAN: 'GREATER_THAN',
+  GREATER_THAN_OR_EQUAL: 'GREATER_THAN_OR_EQUAL',
+  LESS_THAN: 'LESS_THAN',
+  LESS_THAN_OR_EQUAL: 'LESS_THAN_OR_EQUAL',
+};
 
 const predicate = operator =>
   ({ value, other }) => {
     switch (operator) {
-      case 'GREATER_THAN':
+      case operators.GREATER_THAN:
         return value > other;
-      case 'LESS_THAN':
+      case operators.LESS_THAN:
         return value < other;
-      case 'GREATER_THAN_OR_EQUAL':
+      case operators.GREATER_THAN_OR_EQUAL:
         return value >= other;
-      case 'LESS_THAN_OR_EQUAL':
+      case operators.LESS_THAN_OR_EQUAL:
         return value <= other;
-      case 'EXACTLY':
+      case operators.EXACTLY:
         return isEqual(value, other);
-      case 'NOT':
+      case operators.NOT:
         return !isEqual(value, other);
-      case 'EXISTS':
+      case operators.EXISTS:
         return !isNull(value);
-      case 'NOT_EXISTS':
+      case operators.NOT_EXISTS:
         return isNull(value);
       default:
         return false;
