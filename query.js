@@ -3,6 +3,9 @@ const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
 const getRule = require('./rules').default;
 const predicate = require('./predicate').default;
 
+const assertCount = (count, nodes) =>
+  predicate(count.operator)({ value: nodes.length, other: count.value });
+
 /**
  * Returns a method which can query the network.
  * The returned method takes a network object as an argument and returns a boolean.
@@ -54,7 +57,7 @@ const query = ({ rules, join }) => {
         node => rule(node, edgeMap),
       );
 
-      return predicate(count.operator)({ value: nodes.length, other: count.value });
+      return assertCount(count, nodes);
     });
   };
 };
