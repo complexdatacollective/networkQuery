@@ -3,8 +3,8 @@ const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
 const getRule = require('./rules').default;
 const predicate = require('./predicate').default;
 
-const assertCount = (count, nodes) =>
-  predicate(count.operator)({ value: nodes.length, other: count.value });
+const assertResult = (options, nodes) =>
+  predicate(options.operator)({ value: nodes.length, other: options.value });
 
 /**
  * Returns a method which can query the network.
@@ -27,7 +27,7 @@ const assertCount = (count, nodes) =>
  *     {
  *       type: 'alter',
  *       options: { type: 'person', attribute: 'name', operator: 'EXACTLY', value: 'Bill'},
- *       count: { operator: 'GREATER_THAN', value: 0 },
+ *       assert: { operator: 'GREATER_THAN', value: 0 },
  *     },
  *     {
  *       type: 'ego',
@@ -47,17 +47,17 @@ const query = ({ rules, join }) => {
   return (network) => {
     const edgeMap = buildEdgeLookup(network.edges);
 
-    return rules[joinType](({ count, ...ruleConfig }) => {
+    return rules[joinType](({ assert, ...ruleConfig }) => {
       const rule = getRule(ruleConfig);
 
       // we don't perform count on ego rules
       if (ruleConfig.type === 'ego') { return rule(network.ego); }
 
-      const nodes = network.nodes.filter(
+      const result = network.nodes.filter(
         node => rule(node, edgeMap),
       );
 
-      return assertCount(count, nodes);
+      return assertResult(assert, result);
     });
   };
 };

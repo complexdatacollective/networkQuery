@@ -9,12 +9,12 @@ const getNodeGenerator = () => {
   };
 };
 
-const generateRuleConfig = (type, options, count) => {
-  if (count) {
+const generateRuleConfig = (type, options, assert) => {
+  if (assert) {
     return {
       type,
       options,
-      count,
+      assert,
     };
   }
 

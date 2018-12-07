@@ -36,7 +36,7 @@ describe('query', () => {
             attribute: 'age',
             value: 20,
           }, {
-            operator: 'GREATER_THAN',
+            operator: 'COUNT_GREATER_THAN',
             value: 1,
           }),
         ],
@@ -58,7 +58,7 @@ describe('query', () => {
           attribute: 'age',
           value: 20,
         }, {
-          operator: 'GREATER_THAN',
+          operator: 'COUNT_GREATER_THAN',
           value: 3,
         }),
         generateRuleConfig('ego', {
@@ -87,7 +87,7 @@ describe('query', () => {
           attribute: 'age',
           value: 20,
         }, {
-          operator: 'GREATER_THAN',
+          operator: 'COUNT_GREATER_THAN',
           value: 3,
         }),
         generateRuleConfig('ego', {

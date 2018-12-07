@@ -15,6 +15,18 @@ const operators = {
   LESS_THAN_OR_EQUAL: 'LESS_THAN_OR_EQUAL',
 };
 
+// count operators list
+const countOperators = {
+  COUNT: 'COUNT',
+  COUNT_NOT: 'COUNT_NOT',
+  COUNT_ANY: 'COUNT_ANY',
+  COUNT_NONE: 'COUNT_NONE',
+  COUNT_GREATER_THAN: 'COUNT_GREATER_THAN',
+  COUNT_GREATER_THAN_OR_EQUAL: 'COUNT_GREATER_THAN_OR_EQUAL',
+  COUNT_LESS_THAN: 'COUNT_LESS_THAN',
+  COUNT_LESS_THAN_OR_EQUAL: 'COUNT_LESS_THAN_OR_EQUAL',
+};
+
 /**
  * returns functions that can be used to compare `value` with `other`
  *
@@ -30,21 +42,31 @@ const predicate = operator =>
   ({ value, other }) => {
     switch (operator) {
       case operators.GREATER_THAN:
+      case countOperators.COUNT_GREATER_THAN:
         return value > other;
       case operators.LESS_THAN:
+      case countOperators.COUNT_LESS_THAN:
         return value < other;
       case operators.GREATER_THAN_OR_EQUAL:
+      case countOperators.COUNT_GREATER_THAN_OR_EQUAL:
         return value >= other;
       case operators.LESS_THAN_OR_EQUAL:
+      case countOperators.COUNT_LESS_THAN_OR_EQUAL:
         return value <= other;
       case operators.EXACTLY:
+      case countOperators.COUNT:
         return isEqual(value, other);
       case operators.NOT:
+      case countOperators.COUNT_NOT:
         return !isEqual(value, other);
       case operators.EXISTS:
         return !isNull(value);
       case operators.NOT_EXISTS:
         return isNull(value);
+      case countOperators.COUNT_ANY:
+        return value > 0;
+      case countOperators.COUNT_NONE:
+        return value === 0;
       default:
         return false;
     }
@@ -57,3 +79,4 @@ Object.defineProperty(exports, '__esModule', {
 
 exports.default = predicate;
 exports.operators = operators;
+exports.countOperators = countOperators;
