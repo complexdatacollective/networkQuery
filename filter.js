@@ -14,7 +14,7 @@ const trimEdges = (network) => {
     ...network,
     edges,
   };
-}
+};
 
 /**
  * Returns a method which can filter the network.
@@ -56,7 +56,7 @@ const filter = ({ rules, join }) => {
   return (network) => {
     const edgeMap = buildEdgeLookup(network.edges);
 
-    const nodes =  network.nodes.filter(
+    const nodes = network.nodes.filter(
       node => ruleRunners[joinType](rule => rule(node, edgeMap)),
     );
 
@@ -65,7 +65,7 @@ const filter = ({ rules, join }) => {
       nodes,
     });
   };
-}
+};
 
 // Provides ES6 named + default imports via babel
 Object.defineProperty(exports, '__esModule', {
