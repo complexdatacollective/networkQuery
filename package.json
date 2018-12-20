@@ -4,6 +4,7 @@
   "description": "utility for querying against a network",
   "main": "query.js",
   "scripts": {
+    "lint": "eslint *.js",
     "test": "jest"
   },
   "repository": {
@@ -16,9 +17,15 @@
   },
   "homepage": "https://github.com/codaco/networkQuery#readme",
   "devDependencies": {
+    "eslint": "^5.10.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
     "jest": "^23.6.0"
   },
   "jest": {
-    "testMatch": ["<rootDir>/**/*.test.js"]
-  }
+    "testMatch": [
+      "<rootDir>/**/*.test.js"
+    ]
+  },
+  "dependencies": {}
 }

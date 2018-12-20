@@ -1,0 +1,25 @@
+{
+    "extends": "airbnb-base",
+    "env": {
+        "browser": false,
+        "commonjs": false,
+        "es6": true,
+        "node": true
+    },
+    "parserOptions": {
+        "ecmaVersion": 7,
+        "ecmaFeatures": {
+            "jsx": true,
+            "spread": true,
+            "experimentalObjectRestSpread": true,
+            "object-shorthand": ["error", "always"]
+        },
+        "sourceType": "module"
+    },
+    "rules": {
+      "import/no-extraneous-dependencies": "off",
+      "no-mixed-operators": [1, {"allowSamePrecedence": true}],
+      "implicit-arrow-linebreak": 0,
+      "object-curly-newline": 0
+    }
+}
