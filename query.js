@@ -1,5 +1,4 @@
 const buildEdgeLookup = require('./buildEdgeLookup');
-const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
 const getRule = require('./rules').default;
 const predicate = require('./predicate').default;
 
@@ -14,7 +13,8 @@ const assertResult = (options, nodes) =>
  * @param {Object[]} query.rules An array of rule options
  * @param {('ego'|'alter','edge')} query.rules[].type What the rule will act on
  * @param {Object} query.rules[].options The parameters of the rule
- * @param {Object} query.rules[].count The parameters used to assess the rule outcome (unless type is 'ego')
+ * @param {Object} query.rules[].count The parameters used to assess the rule outcome
+ *                                     (unless type is 'ego')
  * @param {('AND'|'OR')} query.join The method used to combine rule outcomes
  *
  * Example usage:

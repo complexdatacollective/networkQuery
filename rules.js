@@ -15,7 +15,7 @@ const edgeRule = ({ operator, type }) =>
       case 'EXISTS':
         return edgeMap[type] && edgeMap[type].has(node[nodePrimaryKeyProperty]);
       default:
-        return !edgeMap[type] || !edgeMap[type].has(node[nodePrimaryKeyProperty])
+        return !edgeMap[type] || !edgeMap[type].has(node[nodePrimaryKeyProperty]);
     }
   };
 
@@ -53,7 +53,7 @@ const alterRule = ({ attribute, operator, type, value: other }) =>
         case 'EXISTS':
           return node.type === type;
         default:
-          return node.type != type;
+          return node.type !== type;
       }
     }
 
@@ -92,7 +92,7 @@ const egoRule = ({ attribute, operator, value: other }) =>
  * ```
  */
 const getRule = (ruleConfig) => {
-  switch(ruleConfig.type) {
+  switch (ruleConfig.type) {
     case 'alter':
       return alterRule(ruleConfig.options);
     case 'edge':
@@ -102,7 +102,7 @@ const getRule = (ruleConfig) => {
     default:
       return () => false;
   }
-}
+};
 
 // Provides ES6 named + default imports via babel
 Object.defineProperty(exports, '__esModule', {
