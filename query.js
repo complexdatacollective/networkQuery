@@ -1,104 +1,70 @@
-const { map } = require('lodash');
-const predicate = require('./predicate').default;
 const buildEdgeLookup = require('./buildEdgeLookup');
-const nodeAttributesProperty = require('./nodeAttributesProperty');
 const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
+const getRule = require('./rules').default;
+const predicate = require('./predicate').default;
 
-/*
+const assertResult = (options, nodes) =>
+  predicate(options.operator)({ value: nodes.length, other: options.value });
 
-join([alter('type', 'attribute', 'operator', 'value'), (edges('type')])(network)
+/**
+ * Returns a method which can query the network.
+ * The returned method takes a network object as an argument and returns a boolean.
+ *
+ * @param query
+ * @param {Object[]} query.rules An array of rule options
+ * @param {('ego'|'alter','edge')} query.rules[].type What the rule will act on
+ * @param {Object} query.rules[].options The parameters of the rule
+ * @param {Object} query.rules[].count The parameters used to assess the rule outcome (unless type is 'ego')
+ * @param {('AND'|'OR')} query.join The method used to combine rule outcomes
+ *
+ * Example usage:
+ *
+ * ```
+ * import getQuery from 'networkQuery/query';
+ *
+ * const config = {
+ *   rules: [
+ *     {
+ *       type: 'alter',
+ *       options: { type: 'person', attribute: 'name', operator: 'EXACTLY', value: 'Bill'},
+ *       assert: { operator: 'GREATER_THAN', value: 0 },
+ *     },
+ *     {
+ *       type: 'ego',
+ *       options: { attribute: 'name', operator: 'EXACTLY', value: 'Bill'},
+ *     },
+ *   ],
+ *   join: 'AND',
+ * };
+ *
+ * const query = getQuery(config);
+ * const result = query(network);
+ */
 
-or([alter('person', 'age', '>', 29), edges('friends')])(network)
+const query = ({ rules, join }) => {
+  const joinType = join === 'AND' ? 'every' : 'some'; // use the built-in methods
 
-or([
-  edges('friends'),
-  alter('person', 'age', '>', 29),
-])(network);
+  return (network) => {
+    const edgeMap = buildEdgeLookup(network.edges);
 
-*/
+    return rules[joinType](({ assert, ...ruleConfig }) => {
+      const rule = getRule(ruleConfig);
 
-const emptyNetwork = {
-  nodes: [],
-  edges: [],
-  ego: {},
-};
+      // we don't perform count on ego rules
+      if (ruleConfig.type === 'ego') { return rule(network.ego); }
 
-const edgeRule = ({
-  type,
-  operator,
-  value: other,
-}) => {
-  const rule = (node, edgeMap) => {
-    switch (operator) {
-      case 'EXISTS':
-        return edgeMap[type] && edgeMap[type].has(node[nodePrimaryKeyProperty]);
-      default:
-        return !edgeMap[type] || !edgeMap[type].has(node[nodePrimaryKeyProperty])
-    }
-  };
-  rule.type = 'edge';
-  return rule;
-}
-
-const alterRule = ({
-  type,
-  attribute,
-  operator,
-  value: other,
-}) => {
-  const rule = node => {
-    if (!attribute) {
-      switch (operator) {
-        case 'EXISTS':
-          return node.type === type;
-        default:
-          return node.type != type;
-      }
-    }
-
-    return node.type === type && predicate(operator)({
-      value: node[nodeAttributesProperty][attribute],
-      other,
-    });
-  }
-  rule.type = 'alter';
-  return rule;
-}
-
-// remove orphaned edges
-const trimEdges = (network) => {
-  const uids = new Set(map(network.nodes, nodePrimaryKeyProperty));
-
-  const edges = network.edges.filter(
-    ({ from, to }) => uids.has(from) && uids.has(to),
-  );
-
-  return {
-    ...network,
-    edges,
-  };
-}
-
-const join = joinType =>
-  rules =>
-    network => {
-      const edgeMap = buildEdgeLookup(network.edges);
-
-      const nodes =  network.nodes.filter(
-        node => rules[joinType](rule => rule(node, edgeMap)),
+      const result = network.nodes.filter(
+        node => rule(node, edgeMap),
       );
 
-      return trimEdges({
-        ...network,
-        nodes,
-      });
-    };
+      return assertResult(assert, result);
+    });
+  };
+};
 
-const or = join('some');
+// Provides ES6 named + default imports via babel
+Object.defineProperty(exports, '__esModule', {
+  value: true,
+});
 
-const and = join('every');
-
-exports.or = or;
-exports.and = and;
-exports.alterRule = alterRule;
-exports.edgeRule = edgeRule;
+exports.default = query;

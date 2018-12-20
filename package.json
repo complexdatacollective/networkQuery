@@ -17,5 +17,8 @@
   "homepage": "https://github.com/codaco/networkQuery#readme",
   "devDependencies": {
     "jest": "^23.6.0"
+  },
+  "jest": {
+    "testMatch": ["<rootDir>/**/*.test.js"]
   }
 }
