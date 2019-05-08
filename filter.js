@@ -49,7 +49,8 @@ const trimEdges = (network) => {
  * const result = filter(network);
  */
 
-const filter = ({ rules, join }) => {
+const filter = ({ rules = [], join } = {}) => {
+
   const ruleRunners = rules.map(getRule);
   const joinType = join === 'AND' ? 'every' : 'some'; // use the built-in methods
 
