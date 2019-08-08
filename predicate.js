@@ -61,10 +61,14 @@ const predicate = operator =>
       case operators.NOT:
       case countOperators.COUNT_NOT:
         return !isEqual(value, other);
-      case operators.INCLUDES:
-        return other.includes(value);
-      case operators.EXCLUDES:
-        return !other.includes(value);
+      case operators.INCLUDES: {
+        const difference = value.filter(x => !other.includes(x));
+        return difference.length === 0;
+      }
+      case operators.EXCLUDES: {
+        const difference = value.filter(x => other.includes(x));
+        return difference.length === 0;
+      }
       case operators.EXISTS:
         return !isNull(value);
       case operators.NOT_EXISTS:
