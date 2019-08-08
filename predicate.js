@@ -6,6 +6,8 @@ const {
 // operators list
 const operators = {
   EXACTLY: 'EXACTLY',
+  INCLUDES: 'INCLUDES',
+  EXCLUDES: 'EXCLUDES',
   EXISTS: 'EXISTS',
   NOT_EXISTS: 'NOT_EXISTS',
   NOT: 'NOT',
@@ -59,6 +61,10 @@ const predicate = operator =>
       case operators.NOT:
       case countOperators.COUNT_NOT:
         return !isEqual(value, other);
+      case operators.INCLUDES:
+        return other.includes(value);
+      case operators.EXCLUDES:
+        return !other.includes(value);
       case operators.EXISTS:
         return !isNull(value);
       case operators.NOT_EXISTS:
