@@ -86,6 +86,50 @@ describe('predicate', () => {
         predicate(operators.NOT_EXISTS)({ value: null })
       ).toBe(true);
     });
+
+    // True if all values are included
+    it('INCLUDES', () => {
+      const other = ['a', 'b', 'c'];
+      const value1 = ['a'];
+      const value2 = ['a', 'b'];
+      const value3 = ['c', 'd'];
+      const value4 = ['d'];
+
+      expect(
+        predicate(operators.INCLUDES)({ value: value1, other })
+      ).toBe(true);
+      expect(
+        predicate(operators.INCLUDES)({ value: value2, other })
+      ).toBe(true);
+      expect(
+        predicate(operators.INCLUDES)({ value: value3, other })
+      ).toBe(false);
+      expect(
+        predicate(operators.INCLUDES)({ value: value4, other })
+      ).toBe(false);
+    });
+
+    // True if all values are excluded
+    it('EXCLUDES', () => {
+      const other = ['a', 'b', 'c'];
+      const value1 = ['a'];
+      const value2 = ['a', 'b'];
+      const value3 = ['c', 'd'];
+      const value4 = ['d'];
+
+      expect(
+        predicate(operators.EXCLUDES)({ value: value1, other })
+      ).toBe(false);
+      expect(
+        predicate(operators.EXCLUDES)({ value: value2, other })
+      ).toBe(false);
+      expect(
+        predicate(operators.EXCLUDES)({ value: value3, other })
+      ).toBe(false);
+      expect(
+        predicate(operators.EXCLUDES)({ value: value4, other })
+      ).toBe(true);
+    });
   });
 
   describe('Count operators', () => {
