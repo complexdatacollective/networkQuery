@@ -6,9 +6,9 @@ const generateNode = helpers.getNodeGenerator();
 const generateRuleConfig = helpers.generateRuleConfig;
 
 const nodes = [
-  generateNode({ name: 'William', age: 19 }),
-  generateNode({ name: 'Theodore', age: 18 }),
-  generateNode({ name: 'Rufus', age: 51 }),
+  generateNode({ name: 'William', age: 19, categoricalNull: null }),
+  generateNode({ name: 'Theodore', age: 18, categoricalNull: null }),
+  generateNode({ name: 'Rufus', age: 51, categoricalNull: null }),
   generateNode({ name: 'Phone Box' }, 'public_utility'),
 ];
 
@@ -30,6 +30,73 @@ describe('rules', () => {
 
 
   describe('alter rules', () => {
+    describe('faulty rules', () => {
+      it('correctly handles missing attribute (EXACTLY)', () => {
+        const ruleConfig = generateRuleConfig(
+          'alter',
+          {
+            type: 'person',
+            attribute: 'missingVariable',
+            operator: 'EXACTLY',
+            value: 19,
+          }
+        );
+
+        const rule = getRule(ruleConfig);
+        const matches = nodes.filter(rule);
+        expect(matches.length).toEqual(0);
+      });
+
+      it('correctly handles missing attribute (NOT)', () => {
+        const ruleConfig = generateRuleConfig(
+          'alter',
+          {
+            type: 'person',
+            attribute: 'missingVariable',
+            operator: 'NOT',
+            value: 19,
+          }
+        );
+
+        const rule = getRule(ruleConfig);
+        const matches = nodes.filter(rule);
+        expect(matches.length).toEqual(3);
+      });
+
+      it('correctly handles falsey categorical attribute (INCLUDES)', () => {
+        const ruleConfig = generateRuleConfig(
+          'alter',
+          {
+            type: 'person',
+            attribute: 'categoricalNull',
+            operator: 'INCLUDES',
+            value: [19],
+          }
+        );
+
+        const rule = getRule(ruleConfig);
+        const matches = nodes.filter(rule);
+        expect(matches.length).toEqual(0);
+      });
+
+      it('correctly handles falsey categorical attribute (EXCLUDES)', () => {
+        const ruleConfig = generateRuleConfig(
+          'alter',
+          {
+            type: 'person',
+            attribute: 'categoricalNull',
+            operator: 'EXCLUDES',
+            value: [19],
+          }
+        );
+
+        const rule = getRule(ruleConfig);
+        const matches = nodes.filter(rule);
+        expect(matches.length).toEqual(3);
+      });
+    });
+
+
     describe('type rules', () => {
       it('EXISTS', () => {
         const ruleConfig = generateRuleConfig('alter', { type: 'person', operator: 'EXISTS' });
