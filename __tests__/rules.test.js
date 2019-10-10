@@ -30,6 +30,73 @@ describe('rules', () => {
 
 
   describe('alter rules', () => {
+    describe('faulty rules', () => {
+      it('ignores missing numerical attribute (EXACTLY)', () => {
+        const ruleConfig = generateRuleConfig(
+          'alter',
+          {
+            type: 'person',
+            attribute: 'missingAttribute',
+            operator: 'EXACTLY',
+            value: 19,
+          }
+        );
+
+        const rule = getRule(ruleConfig);
+        const matches = nodes.filter(rule);
+        expect(matches.length).toEqual(0);
+      });
+
+      it('ignores missing numerical attribute (NOT)', () => {
+        const ruleConfig = generateRuleConfig(
+          'alter',
+          {
+            type: 'person',
+            attribute: 'missingAttribute',
+            operator: 'NOT',
+            value: 19,
+          }
+        );
+
+        const rule = getRule(ruleConfig);
+        const matches = nodes.filter(rule);
+        expect(matches.length).toEqual(3);
+      });
+
+      it('ignores missing categorical attribute (INCLUDES)', () => {
+        const ruleConfig = generateRuleConfig(
+          'alter',
+          {
+            type: 'person',
+            attribute: 'missingAttribute',
+            operator: 'INCLUDES',
+            value: [19],
+          }
+        );
+
+        const rule = getRule(ruleConfig);
+        const matches = nodes.filter(rule);
+        expect(matches.length).toEqual(0);
+      });
+
+      it('ignores missing categorical attribute (EXCLUDES)', () => {
+        const ruleConfig = generateRuleConfig(
+          'alter',
+          {
+            type: 'person',
+            attribute: 'missingAttribute',
+            operator: 'EXCLUDES',
+            value: [19],
+          }
+        );
+
+        const rule = getRule(ruleConfig);
+        const matches = nodes.filter(rule);
+        expect(matches.length).toEqual(3);
+      });
+    });
+
+
     describe('type rules', () => {
       it('EXISTS', () => {
         const ruleConfig = generateRuleConfig('alter', { type: 'person', operator: 'EXISTS' });
