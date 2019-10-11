@@ -87,9 +87,9 @@ describe('predicate', () => {
       ).toBe(true);
     });
 
-    // True if all values are included
+    // True if other is included in value
     it('INCLUDES', () => {
-      const other = ['a', 'b', 'c'];
+      const other = 'a';
       const value1 = ['a'];
       const value2 = ['a', 'b'];
       const value3 = ['c', 'd'];
@@ -109,12 +109,12 @@ describe('predicate', () => {
       ).toBe(false);
     });
 
-    // True if all values are excluded
+    // True if other is not included in value
     it('EXCLUDES', () => {
-      const other = ['a', 'b', 'c'];
+      const other = 'a';
       const value1 = ['a'];
       const value2 = ['a', 'b'];
-      const value3 = ['c', 'd'];
+      const value3 = ['a', 'c', 'd'];
       const value4 = ['d'];
 
       expect(
