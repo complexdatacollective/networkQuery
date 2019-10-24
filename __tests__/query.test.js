@@ -35,9 +35,6 @@ describe('query', () => {
             operator: 'LESS_THAN',
             attribute: 'age',
             value: 20,
-          }, {
-            operator: 'COUNT_GREATER_THAN',
-            value: 1,
           }),
         ],
         join: 'OR',
@@ -57,9 +54,6 @@ describe('query', () => {
           operator: 'LESS_THAN',
           attribute: 'age',
           value: 20,
-        }, {
-          operator: 'COUNT_GREATER_THAN',
-          value: 3,
         }),
         generateRuleConfig('ego', {
           operator: 'EXACTLY',
@@ -86,9 +80,6 @@ describe('query', () => {
           operator: 'LESS_THAN',
           attribute: 'age',
           value: 20,
-        }, {
-          operator: 'COUNT_GREATER_THAN',
-          value: 3,
         }),
         generateRuleConfig('ego', {
           operator: 'EXACTLY',
