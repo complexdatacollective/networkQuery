@@ -39,7 +39,9 @@ const getRule = require('./rules').default;
 const query = ({ rules, join }) => {
   const ruleRunners = rules.map(getRule);
   // use the built-in array methods
-  const ruleIterator = join === 'AND' ? Array.prototype.every : Array.prototype.some;
+  const ruleIterator = join === 'AND'
+    ? Array.prototype.every
+    : Array.prototype.some;
 
   return (network) => {
     const edgeMap = buildEdgeLookup(network.edges);
@@ -50,9 +52,9 @@ const query = ({ rules, join }) => {
 
       // edge rules need to check whole network
       if (rule.type === 'edge') {
-        const edgeIterator = rule.options.operator === 'EXISTS' ?
-          Array.prototype.some :
-          Array.prototype.every;
+        const edgeIterator = rule.options.operator === 'EXISTS'
+          ? Array.prototype.some
+          : Array.prototype.every;
 
         // this would be more efficient if it
         // simply looked at the edge map for number of edges
