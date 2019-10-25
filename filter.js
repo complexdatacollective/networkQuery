@@ -51,13 +51,14 @@ const trimEdges = (network) => {
 
 const filter = ({ rules = [], join } = {}) => {
   const ruleRunners = rules.map(getRule);
-  const joinType = join === 'AND' ? 'every' : 'some'; // use the built-in methods
+  // use the built-in array methods
+  const ruleIterator = join === 'AND' ? Array.prototype.every : Array.prototype.some;
 
   return (network) => {
     const edgeMap = buildEdgeLookup(network.edges);
 
     const nodes = network.nodes.filter(
-      node => ruleRunners[joinType](rule => rule(node, edgeMap)),
+      node => ruleIterator.call(ruleRunners, rule => rule(node, edgeMap)),
     );
 
     return trimEdges({

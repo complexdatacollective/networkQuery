@@ -1,9 +1,5 @@
 const buildEdgeLookup = require('./buildEdgeLookup');
 const getRule = require('./rules').default;
-const predicate = require('./predicate').default;
-
-const assertResult = (options, nodes) =>
-  predicate(options.operator)({ value: nodes.length, other: options.value });
 
 /**
  * Returns a method which can query the network.
@@ -27,7 +23,6 @@ const assertResult = (options, nodes) =>
  *     {
  *       type: 'alter',
  *       options: { type: 'person', attribute: 'name', operator: 'EXACTLY', value: 'Bill'},
- *       assert: { operator: 'GREATER_THAN', value: 0 },
  *     },
  *     {
  *       type: 'ego',
@@ -42,22 +37,23 @@ const assertResult = (options, nodes) =>
  */
 
 const query = ({ rules, join }) => {
-  const joinType = join === 'AND' ? 'every' : 'some'; // use the built-in methods
+  const ruleRunners = rules.map(getRule);
+  // use the built-in array methods
+  const ruleIterator = join === 'AND' ? Array.prototype.every : Array.prototype.some;
 
   return (network) => {
     const edgeMap = buildEdgeLookup(network.edges);
 
-    return rules[joinType](({ assert, ...ruleConfig }) => {
-      const rule = getRule(ruleConfig);
+    return ruleIterator.call(ruleRunners, (rule) => {
+      // ego rules run on a single node
+      if (rule.type === 'ego') { return rule(network.ego); }
 
-      // we don't perform count on ego rules
-      if (ruleConfig.type === 'ego') { return rule(network.ego); }
-
-      const result = network.nodes.filter(
+      // if any of the nodes match, this rule passes
+      const result = network.nodes.some(
         node => rule(node, edgeMap),
       );
 
-      return assertResult(assert, result);
+      return result;
     });
   };
 };

@@ -9,20 +9,10 @@ const getNodeGenerator = () => {
   };
 };
 
-const generateRuleConfig = (type, options, assert) => {
-  if (assert) {
-    return {
-      type,
-      options,
-      assert,
-    };
-  }
-
-  return {
-    type,
-    options,
-  };
-}
+const generateRuleConfig = (type, options) => ({
+  type,
+  options,
+});
 
 exports.getNodeGenerator = getNodeGenerator;
 exports.generateRuleConfig = generateRuleConfig;

@@ -19,6 +19,8 @@ const edgeRule = ({ operator, type }) =>
     }
   };
 
+edgeRule.type = 'edge';
+
 /**
  * Creates an alter rule, which can be called with `rule(node)`
  *
@@ -63,6 +65,8 @@ const alterRule = ({ attribute, operator, type, value: other }) =>
     });
   };
 
+alterRule.type = 'alter';
+
 /**
  * Creates an ego rule, which can be called with `rule(node)`
  *
@@ -77,6 +81,8 @@ const egoRule = ({ attribute, operator, value: other }) =>
       value: node[nodeAttributesProperty][attribute],
       other,
     });
+
+egoRule.type = 'ego';
 
 /**
  * Creates a configured rule function based on the ruleConfig
