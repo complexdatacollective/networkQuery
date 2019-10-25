@@ -1,9 +1,5 @@
 const buildEdgeLookup = require('./buildEdgeLookup');
 const getRule = require('./rules').default;
-const predicate = require('./predicate').default;
-
-const assertResult = (options, nodes) =>
-  predicate(options.operator)({ value: nodes.length, other: options.value });
 
 /**
  * Returns a method which can query the network.
@@ -43,9 +39,7 @@ const assertResult = (options, nodes) =>
 const query = ({ rules, join }) => {
   const ruleRunners = rules.map(getRule);
   // use the built-in array methods
-  const ruleIterator = join === 'AND' ?
-    Array.prototype.every :
-    Array.prototype.some;
+  const ruleIterator = join === 'AND' ? Array.prototype.every : Array.prototype.some;
 
   return (network) => {
     const edgeMap = buildEdgeLookup(network.edges);
