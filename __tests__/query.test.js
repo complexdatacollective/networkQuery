@@ -58,7 +58,7 @@ describe('query', () => {
         generateRuleConfig('ego', {
           operator: 'EXACTLY',
           attribute: 'age',
-          value: 20,
+          value: 19,
         }),
       ],
       join: 'OR',
@@ -94,7 +94,81 @@ describe('query', () => {
 
     it('results are summed with AND', () => {
       const result = query(network);
-      expect(result).toEqual(false);
+      expect(result).toEqual(true);
+    });
+  });
+
+  describe('Rule types', () => {
+    it('it runs ego rules', () => {
+      const sucessfulQuery = getQuery({
+        rules: [
+          generateRuleConfig('ego', {
+            operator: 'EXACTLY',
+            attribute: 'age',
+            value: 20,
+          }),
+        ],
+      });
+
+      expect(sucessfulQuery(network)).toEqual(true);
+
+      const failingQuery = getQuery({
+        rules: [
+          generateRuleConfig('ego', {
+            operator: 'EXACTLY',
+            attribute: 'age',
+            value: 10,
+          }),
+        ],
+      });
+
+      expect(failingQuery(network)).toEqual(false);
+    });
+
+    it('it runs alter rules', () => {
+      const successfulQuery = getQuery({
+        rules: [
+          generateRuleConfig('alter', {
+            type: 'person',
+            operator: 'LESS_THAN',
+            attribute: 'age',
+            value: 20,
+          }),
+        ],
+      });
+
+      expect(successfulQuery(network)).toEqual(true);
+
+      const failingQuery = getQuery({
+        rules: [
+          generateRuleConfig('alter', {
+            type: 'person',
+            operator: 'LESS_THAN',
+            attribute: 'age',
+            value: 0,
+          }),
+        ],
+      });
+
+      expect(failingQuery(network)).toEqual(false);
+    });
+
+    it('it runs edge rules', () => {
+      const successfulQuery = getQuery({
+        rules: [
+          generateRuleConfig('edge', { type: 'friend', operator: 'EXISTS' }),
+        ],
+      });
+
+      expect(successfulQuery(network)).toEqual(true);
+
+      const failingQuery = getQuery({
+        rules: [
+          generateRuleConfig('edge', { type: 'friend', operator: 'NOT_EXISTS' }),
+        ],
+      });
+
+      expect(failingQuery(network)).toEqual(false);
     });
   });
 });

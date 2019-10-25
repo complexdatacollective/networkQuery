@@ -48,6 +48,23 @@ const query = ({ rules, join }) => {
       // ego rules run on a single node
       if (rule.type === 'ego') { return rule(network.ego); }
 
+      // edge rules need to check whole network
+      if (rule.type === 'edge') {
+        const edgeIterator = rule.options.operator === 'EXISTS' ?
+          Array.prototype.some :
+          Array.prototype.every;
+
+        // this would be more efficient if it
+        // simply looked at the edge map for number of edges
+        // however that would deviate pretty far from the filter
+        // version of the rule, so leave as is for now
+
+        return edgeIterator.call(
+          network.nodes,
+          node => rule(node, edgeMap),
+        );
+      }
+
       // if any of the nodes match, this rule passes
       const result = network.nodes.some(
         node => rule(node, edgeMap),
