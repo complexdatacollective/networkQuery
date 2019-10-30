@@ -19,8 +19,6 @@ const edgeRule = ({ operator, type }) =>
     }
   };
 
-edgeRule.type = 'edge';
-
 /**
  * Creates an alter rule, which can be called with `rule(node)`
  *
@@ -65,8 +63,6 @@ const alterRule = ({ attribute, operator, type, value: other }) =>
     });
   };
 
-alterRule.type = 'alter';
-
 /**
  * Creates an ego rule, which can be called with `rule(node)`
  *
@@ -82,7 +78,17 @@ const egoRule = ({ attribute, operator, value: other }) =>
       other,
     });
 
-egoRule.type = 'ego';
+/**
+ * Adds type parameter to rule function
+ * @param {string} type rule type
+ * @param {function} f rule method
+ */
+const createRule = (type, options, f) => {
+  const rule = f(options);
+  rule.type = type;
+  rule.options = options;
+  return rule;
+};
 
 /**
  * Creates a configured rule function based on the ruleConfig
@@ -100,11 +106,11 @@ egoRule.type = 'ego';
 const getRule = (ruleConfig) => {
   switch (ruleConfig.type) {
     case 'alter':
-      return alterRule(ruleConfig.options);
+      return createRule('alter', ruleConfig.options, alterRule);
     case 'edge':
-      return edgeRule(ruleConfig.options);
+      return createRule('edge', ruleConfig.options, edgeRule);
     case 'ego':
-      return egoRule(ruleConfig.options);
+      return createRule('ego', ruleConfig.options, egoRule);
     default:
       return () => false;
   }
