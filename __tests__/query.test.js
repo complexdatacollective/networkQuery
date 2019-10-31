@@ -212,19 +212,19 @@ describe('query', () => {
     });
 
     describe('combining rule types', () => {
-      it('when ego and alter rules are joined by AND, they are first run in types of the same group before those results are then combined again with AND (pass)', () => {
+      it('when ego and alter/edge rules are joined by AND, they are first run in types of the same group before those results are then combined again with AND (pass)', () => {
         const successfulQuery = getQuery({
           join: 'AND',
-          rules: [trueEgoRule1, trueEgoRule2, trueAlterRule1],
+          rules: [trueEgoRule1, trueEgoRule2, trueAlterRule1, generateRuleConfig('edge', { type: 'friend', operator: 'EXISTS' })],
         });
 
         expect(successfulQuery(network)).toEqual(true);
       });
 
-      it('when ego and alter rules are joined by AND, they are first run in types of the same group before those results are then combined again with AND (fail)', () => {
+      it('when ego and alter/edge rules are joined by AND, they are first run in types of the same group before those results are then combined again with AND (fail)', () => {
         const successfulQuery = getQuery({
           join: 'AND',
-          rules: [trueEgoRule1, trueEgoRule2, falseAlterRule1],
+          rules: [trueEgoRule1, trueEgoRule2, falseAlterRule1, generateRuleConfig('edge', { type: 'friend', operator: 'EXISTS' })],
         });
 
         expect(successfulQuery(network)).toEqual(false);

@@ -36,13 +36,20 @@ const getRule = require('./rules').default;
  * const result = query(network);
  */
 
+const typeMap = {
+  edge: 'alter_edge',
+  alter: 'alter_edge',
+  ego: 'ego',
+};
+
 const groupByType = (acc, rule) => {
   const { type } = rule;
-  const typeRules = (acc[type] || []).concat([rule]);
+  const mappedType = typeMap[type];
+  const typeRules = (acc[mappedType] || []).concat([rule]);
 
   return {
     ...acc,
-    [type]: typeRules,
+    [mappedType]: typeRules,
   };
 };
 
@@ -66,31 +73,12 @@ const getQuery = ({ rules, join }) => {
       }
 
       /*
-       * 'edge' type rules
-       * If any of the nodes match, this rule passes.
-       * Because this only checks for exists/not-exists, it could
-       * be made more efficient with a different map, but prefer
-       * parity with the filter function for now.
-       * As it stands alter rules and edge rules are considered
-       * separately, if groupByType combined them (node rules,
-       * can be passed the edgeMap, it will simply ignore it),
-       * then nodes would need to contain all properties AND/OR
-       * those same node be connected by edges.
-       */
-      if (type === 'edge') {
-        return network.nodes.some(
-          node =>
-            ruleIterator.call(typeRules, rule => rule(node, edgeMap)),
-        );
-      }
-
-      /*
-       * 'alter' type rule
+       * 'alter' and 'edge' type rules
        * If any of the nodes match, this rule passes.
        */
       return network.nodes.some(
         node =>
-          ruleIterator.call(typeRules, rule => rule(node)),
+          ruleIterator.call(typeRules, rule => rule(node, edgeMap)),
       );
     });
   };
