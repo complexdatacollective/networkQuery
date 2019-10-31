@@ -2,6 +2,7 @@
 const getQuery = require('../query').default;
 const nodeAttributesProperty = require('../nodeAttributesProperty');
 const helpers = require('./helpers');
+
 const generateNode = helpers.getNodeGenerator();
 const generateRuleConfig = helpers.generateRuleConfig;
 
@@ -9,6 +10,7 @@ const network = {
   ego: {
     [nodeAttributesProperty]: {
       age: 20,
+      favouriteColor: 'blue',
     },
   },
   nodes: [
@@ -26,149 +28,207 @@ const network = {
 };
 
 describe('query', () => {
-  describe('single rule', () => {
-    it('returns a boolean', () => {
-      const queryConfig = {
-        rules: [
-          generateRuleConfig('alter', {
-            type: 'person',
-            operator: 'LESS_THAN',
-            attribute: 'age',
-            value: 20,
-          }),
-        ],
-        join: 'OR',
-      }
-
-      const query = getQuery(queryConfig);
-      const result = query(network);
-      expect(result).toEqual(true);
-    });
-  });
-
-  describe('OR', () => {
+  it('query returns a boolean', () => {
     const queryConfig = {
       rules: [
         generateRuleConfig('alter', {
           type: 'person',
           operator: 'LESS_THAN',
-          attribute: 'age',
-          value: 20,
-        }),
-        generateRuleConfig('ego', {
-          operator: 'EXACTLY',
-          attribute: 'age',
-          value: 19,
-        }),
-      ],
-      join: 'OR',
-    }
-
-    const query = getQuery(queryConfig);
-
-    it('results are summed with OR', () => {
-      const result = query(network);
-      expect(result).toEqual(true);
-    });
-  });
-
-  describe('AND', () => {
-    const queryConfig = {
-      rules: [
-        generateRuleConfig('alter', {
-          type: 'person',
-          operator: 'LESS_THAN',
-          attribute: 'age',
-          value: 20,
-        }),
-        generateRuleConfig('ego', {
-          operator: 'EXACTLY',
           attribute: 'age',
           value: 20,
         }),
       ],
-      join: 'AND',
-    }
+      join: 'OR',
+    };
 
     const query = getQuery(queryConfig);
-
-    it('results are summed with AND', () => {
-      const result = query(network);
-      expect(result).toEqual(true);
-    });
+    const result = query(network);
+    expect(result).toBe(true);
   });
 
-  describe('Rule types', () => {
-    it('it runs ego rules', () => {
-      const sucessfulQuery = getQuery({
-        rules: [
-          generateRuleConfig('ego', {
-            operator: 'EXACTLY',
-            attribute: 'age',
-            value: 20,
-          }),
-        ],
-      });
-
-      expect(sucessfulQuery(network)).toEqual(true);
-
-      const failingQuery = getQuery({
-        rules: [
-          generateRuleConfig('ego', {
-            operator: 'EXACTLY',
-            attribute: 'age',
-            value: 10,
-          }),
-        ],
-      });
-
-      expect(failingQuery(network)).toEqual(false);
+  describe('rule types', () => {
+    const trueEgoRule1 = generateRuleConfig('ego', {
+      operator: 'EXACTLY',
+      attribute: 'age',
+      value: 20,
     });
 
-    it('it runs alter rules', () => {
-      const successfulQuery = getQuery({
-        rules: [
-          generateRuleConfig('alter', {
-            type: 'person',
-            operator: 'LESS_THAN',
-            attribute: 'age',
-            value: 20,
-          }),
-        ],
-      });
-
-      expect(successfulQuery(network)).toEqual(true);
-
-      const failingQuery = getQuery({
-        rules: [
-          generateRuleConfig('alter', {
-            type: 'person',
-            operator: 'LESS_THAN',
-            attribute: 'age',
-            value: 0,
-          }),
-        ],
-      });
-
-      expect(failingQuery(network)).toEqual(false);
+    const trueEgoRule2 = generateRuleConfig('ego', {
+      operator: 'EXACTLY',
+      attribute: 'favouriteColor',
+      value: 'blue',
     });
 
-    it('it runs edge rules', () => {
-      const successfulQuery = getQuery({
-        rules: [
-          generateRuleConfig('edge', { type: 'friend', operator: 'EXISTS' }),
-        ],
+    const falseEgoRule1 = generateRuleConfig('ego', {
+      operator: 'EXACTLY',
+      attribute: 'age',
+      value: 10,
+    });
+
+    const trueAlterRule1 = generateRuleConfig('alter', {
+      type: 'person',
+      operator: 'LESS_THAN',
+      attribute: 'age',
+      value: 20,
+    });
+
+    const falseAlterRule1 = generateRuleConfig('alter', {
+      type: 'person',
+      operator: 'LESS_THAN',
+      attribute: 'age',
+      value: 0,
+    });
+
+    describe('ego rules', () => {
+      it('ego rules are run against the ego node (pass)', () => {
+        const sucessfulQuery = getQuery({
+          rules: [trueEgoRule1],
+        });
+
+        expect(sucessfulQuery(network)).toEqual(true);
       });
 
-      expect(successfulQuery(network)).toEqual(true);
+      it('ego rules are run against the ego node (fail)', () => {
+        const failingQuery = getQuery({
+          rules: [falseEgoRule1],
+        });
 
-      const failingQuery = getQuery({
-        rules: [
-          generateRuleConfig('edge', { type: 'friend', operator: 'NOT_EXISTS' }),
-        ],
+        expect(failingQuery(network)).toEqual(false);
       });
 
-      expect(failingQuery(network)).toEqual(false);
+      it('AND ego rules mean the ego must match BOTH alter rules (pass)', () => {
+        const successfulQuery = getQuery({
+          join: 'AND',
+          rules: [trueEgoRule1, trueEgoRule2],
+        });
+
+        expect(successfulQuery(network)).toEqual(true);
+      });
+
+      it('AND ego rules mean the ego must match BOTH alter rules (fail)', () => {
+        const failingQuery = getQuery({
+          join: 'AND',
+          rules: [falseEgoRule1, trueEgoRule2],
+        });
+
+        expect(failingQuery(network)).toEqual(false);
+      });
+    });
+
+    describe('alter rules', () => {
+      it('an alter rule passes if ANY node matches the rule', () => {
+        const successfulQuery = getQuery({
+          rules: [trueAlterRule1],
+        });
+
+        expect(successfulQuery(network)).toEqual(true);
+
+        const failingQuery = getQuery({
+          rules: [falseAlterRule1],
+        });
+
+        expect(failingQuery(network)).toEqual(false);
+      });
+
+      it('AND alter rules mean a SINGLE NODE must match BOTH alter rules (pass)', () => {
+        const successfulQuery = getQuery({
+          join: 'AND',
+          rules: [
+            trueAlterRule1,
+            generateRuleConfig('alter', {
+              type: 'person',
+              operator: 'EXACTLY',
+              attribute: 'favouriteColor',
+              value: 'red',
+            }),
+          ],
+        });
+
+        expect(successfulQuery(network)).toEqual(true);
+      });
+
+      it('AND alter rules mean a SINGLE NODE must match BOTH alter rules (fail)', () => {
+        const failingQuery = getQuery({
+          join: 'AND',
+          rules: [
+            falseAlterRule1,
+            generateRuleConfig('alter', {
+              type: 'person',
+              operator: 'EXACTLY',
+              attribute: 'favouriteColor',
+              value: 'red',
+            }),
+          ],
+        });
+
+        expect(failingQuery(network)).toEqual(false);
+      });
+    });
+
+    describe('edge rules', () => {
+      it('an edge EXISTS when it can be found on ANY SINGLE NODE in the network', () => {
+        const successfulQuery = getQuery({
+          rules: [
+            generateRuleConfig('edge', { type: 'friend', operator: 'EXISTS' }),
+          ],
+        });
+
+        expect(successfulQuery(network)).toEqual(true);
+      });
+
+      it('an edge NOT_EXISTS when it can NOT be found on ANY SINGLE NODE in the network', () => {
+        const failingQuery = getQuery({
+          rules: [
+            generateRuleConfig('edge', { type: 'enemies', operator: 'NOT_EXISTS' }),
+          ],
+        });
+
+        expect(failingQuery(network)).toEqual(true);
+      });
+
+      it('AND edge rules mean a SINGLE NODE must match BOTH edge rules (pass)', () => {
+        const andQuery = getQuery({
+          join: 'AND',
+          rules: [
+            generateRuleConfig('edge', { type: 'friend', operator: 'EXISTS' }),
+            generateRuleConfig('edge', { type: 'band', operator: 'EXISTS' }),
+          ],
+        });
+
+        expect(andQuery(network)).toEqual(true);
+      });
+
+      it('AND edge rules mean a SINGLE NODE must match BOTH edge rules (fail)', () => {
+        const failingAndQuery = getQuery({
+          join: 'AND',
+          rules: [
+            generateRuleConfig('edge', { type: 'friend', operator: 'EXISTS' }),
+            generateRuleConfig('edge', { type: 'enemies', operator: 'EXISTS' }),
+          ],
+        });
+
+        expect(failingAndQuery(network)).toEqual(false);
+      });
+    });
+
+    describe('combining rule types', () => {
+      it('when ego and alter rules are joined by AND, they are first run in types of the same group before those results are then combined again with AND (pass)', () => {
+        const successfulQuery = getQuery({
+          join: 'AND',
+          rules: [trueEgoRule1, trueEgoRule2, trueAlterRule1],
+        });
+
+        expect(successfulQuery(network)).toEqual(true);
+      });
+
+      it('when ego and alter rules are joined by AND, they are first run in types of the same group before those results are then combined again with AND (fail)', () => {
+        const successfulQuery = getQuery({
+          join: 'AND',
+          rules: [trueEgoRule1, trueEgoRule2, falseAlterRule1],
+        });
+
+        expect(successfulQuery(network)).toEqual(false);
+      });
     });
   });
 });
