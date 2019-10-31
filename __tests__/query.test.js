@@ -96,7 +96,7 @@ describe('query', () => {
         expect(failingQuery(network)).toEqual(false);
       });
 
-      it('AND ego rules mean the ego must match BOTH alter rules (pass)', () => {
+      it('AND ego rules mean the ego must match BOTH ego rules (example pass)', () => {
         const successfulQuery = getQuery({
           join: 'AND',
           rules: [trueEgoRule1, trueEgoRule2],
@@ -105,7 +105,7 @@ describe('query', () => {
         expect(successfulQuery(network)).toEqual(true);
       });
 
-      it('AND ego rules mean the ego must match BOTH alter rules (fail)', () => {
+      it('AND ego rules mean the ego must match BOTH ego rules (example fail)', () => {
         const failingQuery = getQuery({
           join: 'AND',
           rules: [falseEgoRule1, trueEgoRule2],
@@ -130,7 +130,7 @@ describe('query', () => {
         expect(failingQuery(network)).toEqual(false);
       });
 
-      it('AND alter rules mean a SINGLE NODE must match BOTH alter rules (pass)', () => {
+      it('AND alter rules mean a SINGLE NODE must match BOTH alter rules (example pass)', () => {
         const successfulQuery = getQuery({
           join: 'AND',
           rules: [
@@ -147,7 +147,7 @@ describe('query', () => {
         expect(successfulQuery(network)).toEqual(true);
       });
 
-      it('AND alter rules mean a SINGLE NODE must match BOTH alter rules (fail)', () => {
+      it('AND alter rules mean a SINGLE NODE must match BOTH alter rules (example fail)', () => {
         const failingQuery = getQuery({
           join: 'AND',
           rules: [
@@ -186,7 +186,7 @@ describe('query', () => {
         expect(failingQuery(network)).toEqual(true);
       });
 
-      it('AND edge rules mean a SINGLE NODE must match BOTH edge rules (pass)', () => {
+      it('AND edge rules mean a SINGLE NODE must match BOTH edge rules (example pass)', () => {
         const andQuery = getQuery({
           join: 'AND',
           rules: [
@@ -198,7 +198,7 @@ describe('query', () => {
         expect(andQuery(network)).toEqual(true);
       });
 
-      it('AND edge rules mean a SINGLE NODE must match BOTH edge rules (fail)', () => {
+      it('AND edge rules mean a SINGLE NODE must match BOTH edge rules (example fail)', () => {
         const failingAndQuery = getQuery({
           join: 'AND',
           rules: [
@@ -212,22 +212,33 @@ describe('query', () => {
     });
 
     describe('combining rule types', () => {
-      it('when ego and alter/edge rules are joined by AND, they are first run in types of the same group before those results are then combined again with AND (pass)', () => {
+      const trueEdgeRule = generateRuleConfig('edge', { type: 'friend', operator: 'EXISTS' });
+
+      it('when ego and alter/edge rules are joined by AND, they are combined with their own group before those results are then combined again (example pass)', () => {
         const successfulQuery = getQuery({
           join: 'AND',
-          rules: [trueEgoRule1, trueEgoRule2, trueAlterRule1, generateRuleConfig('edge', { type: 'friend', operator: 'EXISTS' })],
+          rules: [trueEgoRule1, trueEgoRule2, trueAlterRule1, trueEdgeRule],
         });
 
         expect(successfulQuery(network)).toEqual(true);
       });
 
-      it('when ego and alter/edge rules are joined by AND, they are first run in types of the same group before those results are then combined again with AND (fail)', () => {
+      it('when ego and alter/edge rules are joined by AND, they are combined with their own group before those results are then combined again (example fail)', () => {
         const successfulQuery = getQuery({
           join: 'AND',
-          rules: [trueEgoRule1, trueEgoRule2, falseAlterRule1, generateRuleConfig('edge', { type: 'friend', operator: 'EXISTS' })],
+          rules: [trueEgoRule1, trueEgoRule2, falseAlterRule1, trueEdgeRule],
         });
 
         expect(successfulQuery(network)).toEqual(false);
+      });
+
+      it('when ego and alter/edge rules are joined by OR, they are combined with their own group before those results are then combined again (example pass)', () => {
+        const successfulQuery = getQuery({
+          join: 'OR',
+          rules: [trueEgoRule1, falseAlterRule1, trueEdgeRule],
+        });
+
+        expect(successfulQuery(network)).toEqual(true);
       });
     });
   });
