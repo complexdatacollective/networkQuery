@@ -12,9 +12,9 @@ describe('buildEdgeLookup()', () => {
   it('returns an edge lookup set', () => {
     const subject = buildEdgeLookup(mockEdges);
     expect(subject).toEqual({
-      "band_members": new Set([3, 4]),
-      "friends": new Set([1, 2, 3]),
-      "running_club": new Set([1, 2]),
+      band_members: new Set([3, 4]),
+      friends: new Set([1, 2, 3]),
+      running_club: new Set([1, 2]),
     });
   });
 });

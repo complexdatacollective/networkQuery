@@ -1,14 +1,15 @@
 /* eslint-env jest */
 const getFilter = require('../filter').default;
 const helpers = require('./helpers');
+
 const generateNode = helpers.getNodeGenerator();
 const generateRuleConfig = helpers.generateRuleConfig;
 
 const network = {
   nodes: [
-    generateNode({ name: 'William', age: 19, favouriteColor: 'green' }),
-    generateNode({ name: 'Theodore', age: 18, favouriteColor: 'red' }),
-    generateNode({ name: 'Rufus', age: 51, favouriteColor: 'red' }),
+    generateNode({ name: 'William', age: 19, favoriteColor: 'green' }),
+    generateNode({ name: 'Theodore', age: 18, favoriteColor: 'red' }),
+    generateNode({ name: 'Rufus', age: 51, favoriteColor: 'red' }),
     generateNode({ name: 'Phone Box' }, 'publicUtility'),
   ],
   edges: [
@@ -32,7 +33,7 @@ describe('filter', () => {
           }),
         ],
         join: 'OR',
-      }
+      };
 
       const filter = getFilter(filterConfig);
       const result = filter(network);
@@ -55,7 +56,7 @@ describe('filter', () => {
         }),
       ],
       join: 'OR',
-    }
+    };
 
     const filter = getFilter(filterConfig);
 
@@ -82,12 +83,12 @@ describe('filter', () => {
         generateRuleConfig('alter', {
           type: 'person',
           operator: 'EXACTLY',
-          attribute: 'favouriteColor',
+          attribute: 'favoriteColor',
           value: 'red',
         }),
       ],
       join: 'AND',
-    }
+    };
 
     const filter = getFilter(filterConfig);
 

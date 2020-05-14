@@ -10,13 +10,13 @@ const network = {
   ego: {
     [nodeAttributesProperty]: {
       age: 20,
-      favouriteColor: 'blue',
+      favoriteColor: 'blue',
     },
   },
   nodes: [
-    generateNode({ name: 'William', age: 19, favouriteColor: 'green' }),
-    generateNode({ name: 'Theodore', age: 18, favouriteColor: 'red' }),
-    generateNode({ name: 'Rufus', age: 51, favouriteColor: 'red' }),
+    generateNode({ name: 'William', age: 19, favoriteColor: 'green' }),
+    generateNode({ name: 'Theodore', age: 18, favoriteColor: 'red' }),
+    generateNode({ name: 'Rufus', age: 51, favoriteColor: 'red' }),
     generateNode({ name: 'Phone Box' }, 'publicUtility'),
   ],
   edges: [
@@ -55,7 +55,7 @@ describe('query', () => {
 
     const trueEgoRule2 = generateRuleConfig('ego', {
       operator: 'EXACTLY',
-      attribute: 'favouriteColor',
+      attribute: 'favoriteColor',
       value: 'blue',
     });
 
@@ -138,7 +138,7 @@ describe('query', () => {
             generateRuleConfig('alter', {
               type: 'person',
               operator: 'EXACTLY',
-              attribute: 'favouriteColor',
+              attribute: 'favoriteColor',
               value: 'red',
             }),
           ],
@@ -155,7 +155,7 @@ describe('query', () => {
             generateRuleConfig('alter', {
               type: 'person',
               operator: 'EXACTLY',
-              attribute: 'favouriteColor',
+              attribute: 'favoriteColor',
               value: 'red',
             }),
           ],

@@ -2,6 +2,7 @@
 const buildEdgeLookup = require('../buildEdgeLookup');
 const getRule = require('../rules').default;
 const helpers = require('./helpers');
+
 const generateNode = helpers.getNodeGenerator();
 const generateRuleConfig = helpers.generateRuleConfig;
 
@@ -39,7 +40,7 @@ describe('rules', () => {
             attribute: 'missingVariable',
             operator: 'EXACTLY',
             value: 19,
-          }
+          },
         );
 
         const rule = getRule(ruleConfig);
@@ -55,7 +56,7 @@ describe('rules', () => {
             attribute: 'missingVariable',
             operator: 'NOT',
             value: 19,
-          }
+          },
         );
 
         const rule = getRule(ruleConfig);
@@ -63,7 +64,7 @@ describe('rules', () => {
         expect(matches.length).toEqual(3);
       });
 
-      it('correctly handles falsey categorical attribute (INCLUDES)', () => {
+      it('correctly handles false-like categorical attribute (INCLUDES)', () => {
         const ruleConfig = generateRuleConfig(
           'alter',
           {
@@ -71,7 +72,7 @@ describe('rules', () => {
             attribute: 'categoricalNull',
             operator: 'INCLUDES',
             value: [19],
-          }
+          },
         );
 
         const rule = getRule(ruleConfig);
@@ -79,7 +80,7 @@ describe('rules', () => {
         expect(matches.length).toEqual(0);
       });
 
-      it('correctly handles falsey categorical attribute (EXCLUDES)', () => {
+      it('correctly handles false-like categorical attribute (EXCLUDES)', () => {
         const ruleConfig = generateRuleConfig(
           'alter',
           {
@@ -87,7 +88,7 @@ describe('rules', () => {
             attribute: 'categoricalNull',
             operator: 'EXCLUDES',
             value: [19],
-          }
+          },
         );
 
         const rule = getRule(ruleConfig);
@@ -107,7 +108,7 @@ describe('rules', () => {
       });
 
       it('NOT_EXISTS', () => {
-        const ruleConfig = generateRuleConfig('alter', { type: 'person', operator: 'NOT_EXISTS' })
+        const ruleConfig = generateRuleConfig('alter', { type: 'person', operator: 'NOT_EXISTS' });
 
         const rule = getRule(ruleConfig);
         const matches = nodes.filter(rule);
@@ -125,7 +126,7 @@ describe('rules', () => {
             attribute: 'name',
             value: 'William',
             ...config,
-          }
+          },
         );
 
       it('EXACTLY', () => {
@@ -168,7 +169,7 @@ describe('rules', () => {
         expect(matches.length).toEqual(1);
       });
 
-    it('GREATER_THAN_OR_EQUAL', () => {
+      it('GREATER_THAN_OR_EQUAL', () => {
         const ruleConfig = generateAttributeRuleConfig({
           attribute: 'age',
           operator: 'GREATER_THAN_OR_EQUAL',
@@ -204,7 +205,7 @@ describe('rules', () => {
     });
 
     it('NOT_EXISTS', () => {
-      const ruleConfig = generateRuleConfig('edge', { type: 'friend', operator: 'NOT_EXISTS' })
+      const ruleConfig = generateRuleConfig('edge', { type: 'friend', operator: 'NOT_EXISTS' });
 
       const rule = getRule(ruleConfig);
       const matches = nodes.filter(node => rule(node, edgeMap));
