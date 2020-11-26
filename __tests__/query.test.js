@@ -241,5 +241,34 @@ describe('query', () => {
         expect(successfulQuery(network)).toEqual(true);
       });
     });
+
+    it('correctly returns NOT_EXISTS', () => {
+      const nodeType = 'TYPE_THAT_DOESNT_EXIST';
+      const testQuery = {
+        join: 'AND',
+        rules: [
+          generateRuleConfig('alter', {
+            type: nodeType,
+            operator: 'NOT_EXISTS',
+          }),
+          generateRuleConfig('alter', {
+            type: nodeType,
+            operator: 'NOT_EXISTS',
+          }),
+        ],
+      };
+      const query = getQuery(testQuery);
+      const mockNetwork = {
+        ...network,
+        nodes: [
+          ...network.nodes,
+          generateNode({ name: 'New type' }, nodeType),
+        ],
+      };
+      const result = query(network);
+      expect(result).toEqual(true);
+      const result2 = query(mockNetwork);
+      expect(result2).toEqual(false);
+    });
   });
 });

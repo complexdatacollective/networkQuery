@@ -36,15 +36,23 @@ const getRule = require('./rules').default;
  * const result = query(network);
  */
 
-const typeMap = {
-  edge: 'alter_edge',
-  alter: 'alter_edge',
-  ego: 'ego',
+const getGroup = (rule) => {
+  const { type, options } = rule;
+  if (type === 'ego') { return 'ego'; }
+
+  if (
+    options.operator === 'NOT_EXISTS'
+    && !options.attribute
+  ) {
+    return 'alter_edge_not_exists';
+  }
+
+  return 'alter_edge';
 };
 
 const groupByType = (acc, rule) => {
-  const { type } = rule;
-  const mappedType = typeMap[type];
+  const mappedType = getGroup(rule);
+
   const typeRules = (acc[mappedType] || []).concat([rule]);
 
   return {
@@ -70,6 +78,15 @@ const getQuery = ({ rules, join }) => {
       // 'ego' type rules run on a single node
       if (type === 'ego') {
         return ruleIterator.call(typeRules, rule => rule(network.ego));
+      }
+
+      // alter or edge not existing is a special case because the
+      // whole network must be evaluated
+      if (type === 'alter_edge_not_exists') {
+        return ruleIterator.call(
+          typeRules,
+          rule => network.nodes.every(node => rule(node, edgeMap)),
+        );
       }
 
       /*
