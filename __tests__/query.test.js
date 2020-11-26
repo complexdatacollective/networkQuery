@@ -251,10 +251,6 @@ describe('query', () => {
             type: nodeType,
             operator: 'NOT_EXISTS',
           }),
-          generateRuleConfig('alter', {
-            type: nodeType,
-            operator: 'NOT_EXISTS',
-          }),
         ],
       };
       const query = getQuery(testQuery);
@@ -269,6 +265,47 @@ describe('query', () => {
       expect(result).toEqual(true);
       const result2 = query(mockNetwork);
       expect(result2).toEqual(false);
+    });
+
+    it('correctly returns mixed NOT_EXISTS', () => {
+      const testQuery = {
+        join: 'AND',
+        rules: [
+          // true if there is a node with a different name
+          generateRuleConfig('alter', {
+            type: 'TYPE_A',
+            attribute: 'name',
+            operator: 'NOT',
+            value: 'foo',
+          }),
+          // true if this node type doesn't exist anywhere
+          generateRuleConfig('alter', {
+            type: 'TYPE_B',
+            operator: 'NOT_EXISTS',
+          }),
+        ],
+      };
+      const query = getQuery(testQuery);
+      const mockNetwork = {
+        ...network,
+        nodes: [
+          ...network.nodes,
+          generateNode({ name: 'bar' }, 'TYPE_A'),
+        ],
+      };
+      const mockNetwork2 = {
+        ...network,
+        nodes: [
+          ...network.nodes,
+          generateNode({ name: 'foo' }, 'TYPE_A'),
+        ],
+      };
+      const result = query(network);
+      expect(result).toEqual(false);
+      const result2 = query(mockNetwork);
+      expect(result2).toEqual(true);
+      const result3 = query(mockNetwork2);
+      expect(result3).toEqual(false);
     });
   });
 });
