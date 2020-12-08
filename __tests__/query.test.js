@@ -1,10 +1,9 @@
 /* eslint-env jest */
 const getQuery = require('../query').default;
 const nodeAttributesProperty = require('../nodeAttributesProperty');
-const helpers = require('./helpers');
+const { generateRuleConfig, getNodeGenerator } = require('./helpers');
 
-const generateNode = helpers.getNodeGenerator();
-const generateRuleConfig = helpers.generateRuleConfig;
+const generateNode = getNodeGenerator();
 
 const network = {
   ego: {
@@ -44,6 +43,41 @@ describe('query', () => {
     const query = getQuery(queryConfig);
     const result = query(network);
     expect(result).toBe(true);
+  });
+
+  describe('empty values', () => {
+    const existsQuery = getQuery({
+      rules: [
+        generateRuleConfig('alter', {
+          type: 'person',
+          operator: 'EXISTS',
+        }),
+      ],
+      join: 'OR',
+    });
+
+    const notExistsQuery = getQuery({
+      rules: [
+        generateRuleConfig('alter', {
+          type: 'person',
+          operator: 'NOT_EXISTS',
+        }),
+      ],
+      join: 'OR',
+    });
+
+    it('works with an empty network', () => {
+      const emptyNetwork = { nodes: [], edges: [], ego: {} };
+      const existsResult = existsQuery(emptyNetwork);
+      const notExistsResult = notExistsQuery(emptyNetwork);
+      expect(existsResult).toBe(false);
+      expect(notExistsResult).toBe(true);
+    });
+
+    it('throws an error for an undefined network', () => {
+      expect(() => existsQuery(undefined)).toThrow();
+      expect(() => notExistsQuery(undefined)).toThrow();
+    });
   });
 
   describe('rule types', () => {
