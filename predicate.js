@@ -57,6 +57,7 @@ const predicate = operator =>
         return value <= other;
       case operators.EXACTLY:
       case countOperators.COUNT:
+        if (isNull(value)) return other === false;
         return isEqual(value, other);
       case operators.NOT:
       case countOperators.COUNT_NOT:

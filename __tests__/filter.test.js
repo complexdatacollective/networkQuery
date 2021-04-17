@@ -7,9 +7,9 @@ const generateRuleConfig = helpers.generateRuleConfig;
 
 const network = {
   nodes: [
-    generateNode({ name: 'William', age: 19, favoriteColor: 'green' }),
-    generateNode({ name: 'Theodore', age: 18, favoriteColor: 'red' }),
-    generateNode({ name: 'Rufus', age: 51, favoriteColor: 'red' }),
+    generateNode({ name: 'William', age: 19, favoriteColor: 'green', likesFish: true }),
+    generateNode({ name: 'Theodore', age: 18, favoriteColor: 'red', likesFish: false }),
+    generateNode({ name: 'Rufus', age: 51, favoriteColor: 'red', likesFish: null }),
     generateNode({ name: 'Phone Box' }, 'publicUtility'),
   ],
   edges: [
@@ -37,6 +37,26 @@ describe('filter', () => {
 
       const filter = getFilter(filterConfig);
       const result = filter(network);
+      expect(result.nodes.length).toEqual(2);
+    });
+
+    it('nodes match the boolean rule', () => {
+      const filterConfig = {
+        rules: [
+          generateRuleConfig('alter', {
+            type: 'person',
+            operator: 'EXACTLY',
+            attribute: 'likesFish',
+            value: false,
+          }),
+        ],
+        join: 'OR',
+      };
+  
+      const filter = getFilter(filterConfig);
+      const result = filter(network);
+      console.log(result.nodes);
+      console.log(network);
       expect(result.nodes.length).toEqual(2);
     });
   });
