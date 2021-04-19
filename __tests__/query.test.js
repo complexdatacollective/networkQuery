@@ -13,9 +13,9 @@ const network = {
     },
   },
   nodes: [
-    generateNode({ name: 'William', age: 19, favoriteColor: 'green' }),
-    generateNode({ name: 'Theodore', age: 18, favoriteColor: 'red' }),
-    generateNode({ name: 'Rufus', age: 51, favoriteColor: 'red' }),
+    generateNode({ name: 'William', age: 19, favoriteColor: 'green', likesFish: true }),
+    generateNode({ name: 'Theodore', age: 18, favoriteColor: 'red', likesFish: false }),
+    generateNode({ name: 'Rufus', age: 51, favoriteColor: 'red', likesFish: null }),
     generateNode({ name: 'Phone Box' }, 'publicUtility'),
   ],
   edges: [
@@ -115,11 +115,11 @@ describe('query', () => {
 
     describe('ego rules', () => {
       it('ego rules are run against the ego node (pass)', () => {
-        const sucessfulQuery = getQuery({
+        const successfulQuery = getQuery({
           rules: [trueEgoRule1],
         });
 
-        expect(sucessfulQuery(network)).toEqual(true);
+        expect(successfulQuery(network)).toEqual(true);
       });
 
       it('ego rules are run against the ego node (fail)', () => {
@@ -162,6 +162,18 @@ describe('query', () => {
         });
 
         expect(failingQuery(network)).toEqual(false);
+
+        const trueAlterRule2 = generateRuleConfig('alter', {
+          type: 'person',
+          operator: 'EXACTLY',
+          attribute: 'likesFish',
+          value: false,
+        });
+
+        const successfulQuery2 = getQuery({
+          rules: [trueAlterRule2],
+        });
+        expect(successfulQuery2(network)).toEqual(true);
       });
 
       it('AND alter rules mean a SINGLE NODE must match BOTH alter rules (example pass)', () => {

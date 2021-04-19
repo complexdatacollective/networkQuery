@@ -58,6 +58,39 @@ describe('predicate', () => {
       expect(
         predicate(operators.EXACTLY)({ value: 2, other: 1 }),
       ).toBe(false);
+      expect(
+        predicate(operators.EXACTLY)({ value: null, other: 0 }),
+      ).toBe(false);
+      expect(
+        predicate(operators.EXACTLY)({ value: 'word', other: 'word' }),
+      ).toBe(true);
+      expect(
+        predicate(operators.EXACTLY)({ value: 'not word', other: 'word' }),
+      ).toBe(false);
+      expect(
+        predicate(operators.EXACTLY)({ value: null, other: 'word' }),
+      ).toBe(false);
+      expect(
+        predicate(operators.EXACTLY)({ value: true, other: true }),
+      ).toBe(true);
+      expect(
+        predicate(operators.EXACTLY)({ value: false, other: true }),
+      ).toBe(false);
+      expect(
+        predicate(operators.EXACTLY)({ value: null, other: true }),
+      ).toBe(false);
+      expect(
+        predicate(operators.EXACTLY)({ value: true, other: false }),
+      ).toBe(false);
+      expect(
+        predicate(operators.EXACTLY)({ value: false, other: false }),
+      ).toBe(true);
+      expect(
+        predicate(operators.EXACTLY)({ value: null, other: false }),
+      ).toBe(false);
+      expect(
+        predicate(operators.EXACTLY)({ value: false, other: null }),
+      ).toBe(false);
     });
 
     it('NOT', () => {
@@ -66,6 +99,21 @@ describe('predicate', () => {
       ).toBe(false);
       expect(
         predicate(operators.NOT)({ value: 2, other: 1 }),
+      ).toBe(true);
+      expect(
+        predicate(operators.NOT)({ value: null, other: false }),
+      ).toBe(true);
+      expect(
+        predicate(operators.NOT)({ value: null, other: true }),
+      ).toBe(true);
+      expect(
+        predicate(operators.NOT)({ value: false, other: null }),
+      ).toBe(true);
+      expect(
+        predicate(operators.NOT)({ value: false, other: true }),
+      ).toBe(true);
+      expect(
+        predicate(operators.NOT)({ value: true, other: false }),
       ).toBe(true);
     });
 
