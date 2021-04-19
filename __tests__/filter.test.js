@@ -40,7 +40,10 @@ describe('filter', () => {
       expect(result.nodes.length).toEqual(2);
     });
 
-    it('nodes match the boolean rule', () => {
+  });
+
+  describe('Boolean edge cases', () => {
+    it('"exactly" operator excludes null values', () => {
       const filterConfig = {
         rules: [
           generateRuleConfig('alter', {
@@ -52,12 +55,26 @@ describe('filter', () => {
         ],
         join: 'OR',
       };
-  
+
       const filter = getFilter(filterConfig);
       const result = filter(network);
-      console.log(result.nodes);
-      console.log(network);
-      expect(result.nodes.length).toEqual(2);
+      expect(result.nodes.length).toEqual(1);
+
+      const filterConfig2 = {
+        rules: [
+          generateRuleConfig('alter', {
+            type: 'person',
+            operator: 'EXACTLY',
+            attribute: 'likesFish',
+            value: true,
+          }),
+        ],
+        join: 'OR',
+      };
+
+      const filter2 = getFilter(filterConfig2);
+      const result2 = filter2(network);
+      expect(result2.nodes.length).toEqual(1);
     });
   });
 

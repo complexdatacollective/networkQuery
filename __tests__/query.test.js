@@ -113,13 +113,6 @@ describe('query', () => {
       value: 0,
     });
 
-    const trueAlterRule2 = generateRuleConfig('alter', {
-      type: 'person',
-      operator: 'EXACTLY',
-      attribute: 'likesFish',
-      value: false,
-    });
-
     describe('ego rules', () => {
       it('ego rules are run against the ego node (pass)', () => {
         const successfulQuery = getQuery({
@@ -170,10 +163,16 @@ describe('query', () => {
 
         expect(failingQuery(network)).toEqual(false);
 
+        const trueAlterRule2 = generateRuleConfig('alter', {
+          type: 'person',
+          operator: 'EXACTLY',
+          attribute: 'likesFish',
+          value: false,
+        });
+
         const successfulQuery2 = getQuery({
           rules: [trueAlterRule2],
         });
-
         expect(successfulQuery2(network)).toEqual(true);
       });
 

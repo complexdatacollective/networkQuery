@@ -87,7 +87,10 @@ describe('predicate', () => {
       ).toBe(true);
       expect(
         predicate(operators.EXACTLY)({ value: null, other: false }),
-      ).toBe(true);
+      ).toBe(false);
+      expect(
+        predicate(operators.EXACTLY)({ value: false, other: null }),
+      ).toBe(false);
     });
 
     it('NOT', () => {
@@ -96,6 +99,21 @@ describe('predicate', () => {
       ).toBe(false);
       expect(
         predicate(operators.NOT)({ value: 2, other: 1 }),
+      ).toBe(true);
+      expect(
+        predicate(operators.NOT)({ value: null, other: false }),
+      ).toBe(true);
+      expect(
+        predicate(operators.NOT)({ value: null, other: true }),
+      ).toBe(true);
+      expect(
+        predicate(operators.NOT)({ value: false, other: null }),
+      ).toBe(true);
+      expect(
+        predicate(operators.NOT)({ value: false, other: true }),
+      ).toBe(true);
+      expect(
+        predicate(operators.NOT)({ value: true, other: false }),
       ).toBe(true);
     });
 
