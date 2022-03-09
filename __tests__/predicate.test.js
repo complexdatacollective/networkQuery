@@ -178,6 +178,59 @@ describe('predicate', () => {
         predicate(operators.EXCLUDES)({ value: value4, other }),
       ).toBe(true);
     });
+
+    it('OPTIONS_GREATER_THAN', () => {
+      const other = 2;
+      const value1 = ['a', 'b'];
+      const value2 = ['a', 'c', 'd'];
+
+      expect(
+        predicate(operators.OPTIONS_GREATER_THAN)({ value: value1, other }),
+      ).toBe(false);
+      expect(
+        predicate(operators.OPTIONS_GREATER_THAN)({ value: value2, other }),
+      ).toBe(true);
+    });
+
+    it('OPTIONS_LESS_THAN', () => {
+      const other = 2;
+      const value1 = ['a'];
+      const value2 = ['a', 'c', 'd'];
+
+      expect(
+        predicate(operators.OPTIONS_LESS_THAN)({ value: value1, other }),
+      ).toBe(true);
+      expect(
+        predicate(operators.OPTIONS_LESS_THAN)({ value: value2, other }),
+      ).toBe(false);
+    });
+
+
+    it('OPTIONS_EQUALS', () => {
+      const other = 2;
+      const value1 = ['a', 'b'];
+      const value2 = ['a', 'c', 'd'];
+
+      expect(
+        predicate(operators.OPTIONS_EQUALS)({ value: value1, other }),
+      ).toBe(true);
+      expect(
+        predicate(operators.OPTIONS_EQUALS)({ value: value2, other }),
+      ).toBe(false);
+    });
+
+    it('OPTIONS_NOT_EQUALS', () => {
+      const other = 2;
+      const value1 = ['a', 'b'];
+      const value2 = ['a', 'c', 'd'];
+
+      expect(
+        predicate(operators.OPTIONS_NOT_EQUALS)({ value: value1, other }),
+      ).toBe(false);
+      expect(
+        predicate(operators.OPTIONS_NOT_EQUALS)({ value: value2, other }),
+      ).toBe(true);
+    });
   });
 
   describe('Count operators', () => {
