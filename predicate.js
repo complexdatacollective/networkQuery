@@ -1,6 +1,7 @@
 const {
   isEqual,
   isNull,
+  isArray,
 } = require('lodash');
 
 // operators list
@@ -15,6 +16,10 @@ const operators = {
   GREATER_THAN_OR_EQUAL: 'GREATER_THAN_OR_EQUAL',
   LESS_THAN: 'LESS_THAN',
   LESS_THAN_OR_EQUAL: 'LESS_THAN_OR_EQUAL',
+  OPTIONS_GREATER_THAN: 'OPTIONS_GREATER_THAN',
+  OPTIONS_LESS_THAN: 'OPTIONS_LESS_THAN',
+  OPTIONS_EQUALS: 'OPTIONS_EQUALS',
+  OPTIONS_NOT_EQUALS: 'OPTIONS_NOT_EQUALS',
 };
 
 // count operators list
@@ -77,6 +82,22 @@ const predicate = operator =>
         return value > 0;
       case countOperators.COUNT_NONE:
         return value === 0;
+      case operators.OPTIONS_GREATER_THAN: {
+        if (!isArray(value)) { return false; }
+        return value.length > other;
+      }
+      case operators.OPTIONS_LESS_THAN: {
+        if (!isArray(value)) { return false; }
+        return value.length < other;
+      }
+      case operators.OPTIONS_EQUALS: {
+        if (!isArray(value)) { return false; }
+        return value.length === other;
+      }
+      case operators.OPTIONS_NOT_EQUALS: {
+        if (!isArray(value)) { return false; }
+        return value.length !== other;
+      }
       default:
         return false;
     }
