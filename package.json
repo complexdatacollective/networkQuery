@@ -1,5 +1,5 @@
 {
-  "name": "network-query",
+  "name": "@codaco/network-query",
   "version": "1.0.0",
   "description": "utility for querying against a network",
   "main": "query.js",
@@ -17,10 +17,10 @@
   },
   "homepage": "https://github.com/codaco/networkQuery#readme",
   "devDependencies": {
-    "eslint": "^7.0.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "jest": "^23.6.0"
+    "eslint": "^8.12.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4",
+    "jest": "^27.5.1"
   },
   "jest": {
     "testMatch": [
