@@ -12,6 +12,8 @@ const operators = {
   EXISTS: 'EXISTS',
   NOT_EXISTS: 'NOT_EXISTS',
   NOT: 'NOT',
+  CONTAINS: 'CONTAINS',
+  DOES_NOT_CONTAIN: 'DOES_NOT_CONTAIN',
   GREATER_THAN: 'GREATER_THAN',
   GREATER_THAN_OR_EQUAL: 'GREATER_THAN_OR_EQUAL',
   LESS_THAN: 'LESS_THAN',
@@ -66,13 +68,21 @@ const predicate = operator =>
       case operators.NOT:
       case countOperators.COUNT_NOT:
         return !isEqual(value, other);
+      case operators.CONTAINS: {
+        const regexp = new RegExp(other);
+        return regexp.test(value);
+      }
+      case operators.DOES_NOT_CONTAIN: {
+        const regexp = new RegExp(other);
+        return !regexp.test(value);
+      }
       case operators.INCLUDES: {
         if (!value) { return false; } // ord/cat vars are initialised to null
-        return value.includes(other);
+        return value.some(v => other.includes(v));
       }
       case operators.EXCLUDES: {
         if (!value) { return true; } // ord/cat vars are initialised to null
-        return !value.includes(other);
+        return !value.some(v => other.includes(v));
       }
       case operators.EXISTS:
         return !isNull(value);

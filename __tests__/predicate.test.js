@@ -117,6 +117,30 @@ describe('predicate', () => {
       ).toBe(true);
     });
 
+    it('CONTAINS', () => {
+      expect(
+        predicate(operators.CONTAINS)({ value: 'word', other: 'wo' }),
+      ).toBe(true);
+      expect(
+        predicate(operators.CONTAINS)({ value: 'word', other: '^w' }),
+      ).toBe(true);
+      expect(
+        predicate(operators.CONTAINS)({ value: 'word', other: '^g' }),
+      ).toBe(false);
+    });
+
+    it('DOES_NOT_CONTAIN', () => {
+      expect(
+        predicate(operators.DOES_NOT_CONTAIN)({ value: 'word', other: 'go' }),
+      ).toBe(true);
+      expect(
+        predicate(operators.DOES_NOT_CONTAIN)({ value: 'word', other: '^g' }),
+      ).toBe(true);
+      expect(
+        predicate(operators.DOES_NOT_CONTAIN)({ value: 'word', other: '^w' }),
+      ).toBe(false);
+    });
+
     it('EXISTS', () => {
       expect(
         predicate(operators.EXISTS)({ value: null }),
@@ -138,6 +162,7 @@ describe('predicate', () => {
     // True if other is included in value
     it('INCLUDES', () => {
       const other = 'a';
+      const other2 = ['a', 'b'];
       const value1 = ['a'];
       const value2 = ['a', 'b'];
       const value3 = ['c', 'd'];
@@ -155,11 +180,21 @@ describe('predicate', () => {
       expect(
         predicate(operators.INCLUDES)({ value: value4, other }),
       ).toBe(false);
+      expect(
+        predicate(operators.INCLUDES)({ value: value1, other: other2 }),
+      ).toBe(true);
+      expect(
+        predicate(operators.INCLUDES)({ value: value2, other: other2 }),
+      ).toBe(true);
+      expect(
+        predicate(operators.INCLUDES)({ value: value3, other: other2 }),
+      ).toBe(false);
     });
 
     // True if other is not included in value
     it('EXCLUDES', () => {
       const other = 'a';
+      const other2 = ['a', 'b'];
       const value1 = ['a'];
       const value2 = ['a', 'b'];
       const value3 = ['a', 'c', 'd'];
@@ -176,6 +211,18 @@ describe('predicate', () => {
       ).toBe(false);
       expect(
         predicate(operators.EXCLUDES)({ value: value4, other }),
+      ).toBe(true);
+      expect(
+        predicate(operators.EXCLUDES)({ value: value1, other: other2 }),
+      ).toBe(false);
+      expect(
+        predicate(operators.EXCLUDES)({ value: value2, other: other2 }),
+      ).toBe(false);
+      expect(
+        predicate(operators.EXCLUDES)({ value: value3, other: other2 }),
+      ).toBe(false);
+      expect(
+        predicate(operators.EXCLUDES)({ value: value4, other: other2 }),
       ).toBe(true);
     });
 
