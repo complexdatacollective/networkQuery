@@ -1,5 +1,5 @@
-const nodeAttributesProperty = require('./nodeAttributesProperty');
-const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
+const { entityAttributesProperty, entityPrimaryKeyProperty } = require('@codaco/shared-consts');
+
 const predicate = require('./predicate').default;
 
 /**
@@ -13,9 +13,9 @@ const edgeRule = ({ operator, type }) =>
   (node, edgeMap) => {
     switch (operator) {
       case 'EXISTS':
-        return edgeMap[type] && edgeMap[type].has(node[nodePrimaryKeyProperty]);
+        return edgeMap[type] && edgeMap[type].has(node[entityPrimaryKeyProperty]);
       default:
-        return !edgeMap[type] || !edgeMap[type].has(node[nodePrimaryKeyProperty]);
+        return !edgeMap[type] || !edgeMap[type].has(node[entityPrimaryKeyProperty]);
     }
   };
 
@@ -58,7 +58,7 @@ const alterRule = ({ attribute, operator, type, value: other }) =>
     }
 
     return node.type === type && predicate(operator)({
-      value: node[nodeAttributesProperty][attribute],
+      value: node[entityAttributesProperty][attribute],
       other,
     });
   };
@@ -74,7 +74,7 @@ const alterRule = ({ attribute, operator, type, value: other }) =>
 const egoRule = ({ attribute, operator, value: other }) =>
   node =>
     predicate(operator)({
-      value: node[nodeAttributesProperty][attribute],
+      value: node[entityAttributesProperty][attribute],
       other,
     });
 

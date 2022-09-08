@@ -1,10 +1,10 @@
+const { entityPrimaryKeyProperty } = require('@codaco/shared-consts');
 const buildEdgeLookup = require('./buildEdgeLookup');
-const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
 const getRule = require('./rules').default;
 
 // remove orphaned edges
 const trimEdges = (network) => {
-  const uids = new Set(network.nodes.map(node => node[nodePrimaryKeyProperty]));
+  const uids = new Set(network.nodes.map(node => node[entityPrimaryKeyProperty]));
 
   const edges = network.edges.filter(
     ({ from, to }) => uids.has(from) && uids.has(to),

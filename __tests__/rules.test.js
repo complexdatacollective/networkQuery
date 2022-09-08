@@ -1,23 +1,22 @@
 /* eslint-env jest */
 const buildEdgeLookup = require('../buildEdgeLookup');
 const getRule = require('../rules').default;
-const helpers = require('./helpers');
+const { getEntityGenerator, generateRuleConfig } = require('./helpers');
 
-const generateNode = helpers.getNodeGenerator();
-const generateRuleConfig = helpers.generateRuleConfig;
+const generateEntity = getEntityGenerator();
 
 const nodes = [
-  generateNode({ name: 'William', age: 19, categoricalNull: null }),
-  generateNode({ name: 'Theodore', age: 18, categoricalNull: null }),
-  generateNode({ name: 'Rufus', age: 51, categoricalNull: null }),
-  generateNode({ name: 'Phone Box' }, 'public_utility'),
+  generateEntity({ name: 'William', age: 19, categoricalNull: null }),
+  generateEntity({ name: 'Theodore', age: 18, categoricalNull: null }),
+  generateEntity({ name: 'Rufus', age: 51, categoricalNull: null }),
+  generateEntity({ name: 'Phone Box' }, null, 'node', 'public_utility'),
 ];
 
 const edges = [
-  { from: 1, to: 2, type: 'friend' },
-  { from: 2, to: 3, type: 'friend' },
-  { from: 1, to: 3, type: 'friend' },
-  { from: 1, to: 2, type: 'band' },
+  generateEntity({}, { from: 1, to: 2 }, 'edge', 'friend'),
+  generateEntity({}, { from: 2, to: 3 }, 'edge', 'friend'),
+  generateEntity({}, { from: 1, to: 3 }, 'edge', 'friend'),
+  generateEntity({}, { from: 1, to: 2 }, 'edge', 'band'),
 ];
 
 const edgeMap = buildEdgeLookup(edges);

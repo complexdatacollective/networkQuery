@@ -1,28 +1,29 @@
 /* eslint-env jest */
+const { entityAttributesProperty } = require('@codaco/shared-consts');
 const getQuery = require('../query').default;
-const nodeAttributesProperty = require('../nodeAttributesProperty');
-const { generateRuleConfig, getNodeGenerator } = require('./helpers');
+const { generateRuleConfig, getEntityGenerator } = require('./helpers');
 
-const generateNode = getNodeGenerator();
+const generateEntity = getEntityGenerator();
+
 
 const network = {
   ego: {
-    [nodeAttributesProperty]: {
+    [entityAttributesProperty]: {
       age: 20,
       favoriteColor: 'blue',
     },
   },
   nodes: [
-    generateNode({ name: 'William', age: 19, favoriteColor: 'green', likesFish: true }),
-    generateNode({ name: 'Theodore', age: 18, favoriteColor: 'red', likesFish: false }),
-    generateNode({ name: 'Rufus', age: 51, favoriteColor: 'red', likesFish: null }),
-    generateNode({ name: 'Phone Box' }, 'publicUtility'),
+    generateEntity({ name: 'William', age: 19, favoriteColor: 'green', likesFish: true }),
+    generateEntity({ name: 'Theodore', age: 18, favoriteColor: 'red', likesFish: false }),
+    generateEntity({ name: 'Rufus', age: 51, favoriteColor: 'red', likesFish: null }),
+    generateEntity({ name: 'Phone Box' }, 'publicUtility'),
   ],
   edges: [
-    { from: 1, to: 2, type: 'friend' },
-    { from: 2, to: 3, type: 'friend' },
-    { from: 1, to: 3, type: 'friend' },
-    { from: 1, to: 2, type: 'band' },
+    generateEntity({}, { from: 1, to: 2 }, 'edge', 'friend'),
+    generateEntity({}, { from: 2, to: 3 }, 'edge', 'friend'),
+    generateEntity({}, { from: 1, to: 3 }, 'edge', 'friend'),
+    generateEntity({}, { from: 1, to: 2 }, 'edge', 'band'),
   ],
 };
 
@@ -304,7 +305,7 @@ describe('query', () => {
         ...network,
         nodes: [
           ...network.nodes,
-          generateNode({ name: 'New type' }, nodeType),
+          generateEntity({ name: 'New type' }, 'node', null, nodeType),
         ],
       };
       const result = query(network);
@@ -336,14 +337,14 @@ describe('query', () => {
         ...network,
         nodes: [
           ...network.nodes,
-          generateNode({ name: 'bar' }, 'TYPE_A'),
+          generateEntity({ name: 'bar' }, null, 'node', 'TYPE_A'),
         ],
       };
       const mockNetwork2 = {
         ...network,
         nodes: [
           ...network.nodes,
-          generateNode({ name: 'foo' }, 'TYPE_A'),
+          generateEntity({ name: 'foo' }, null, 'node', 'TYPE_A'),
         ],
       };
       const result = query(network);

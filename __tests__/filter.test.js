@@ -1,22 +1,21 @@
 /* eslint-env jest */
 const getFilter = require('../filter').default;
-const helpers = require('./helpers');
+const { getEntityGenerator, generateRuleConfig } = require('./helpers');
 
-const generateNode = helpers.getNodeGenerator();
-const generateRuleConfig = helpers.generateRuleConfig;
+const generateEntity = getEntityGenerator();
 
 const network = {
   nodes: [
-    generateNode({ name: 'William', age: 19, favoriteColor: 'green', likesFish: true }),
-    generateNode({ name: 'Theodore', age: 18, favoriteColor: 'red', likesFish: false }),
-    generateNode({ name: 'Rufus', age: 51, favoriteColor: 'red', likesFish: null }),
-    generateNode({ name: 'Phone Box' }, 'publicUtility'),
+    generateEntity({ name: 'William', age: 19, favoriteColor: 'green', likesFish: true }),
+    generateEntity({ name: 'Theodore', age: 18, favoriteColor: 'red', likesFish: false }),
+    generateEntity({ name: 'Rufus', age: 51, favoriteColor: 'red', likesFish: null }),
+    generateEntity({ name: 'Phone Box' }, null, 'node', 'publicUtility'),
   ],
   edges: [
-    { from: 1, to: 2, type: 'friend' },
-    { from: 2, to: 3, type: 'friend' },
-    { from: 1, to: 3, type: 'friend' },
-    { from: 1, to: 2, type: 'band' },
+    generateEntity({ booleanVariable: true }, { from: 1, to: 2 }, 'edge', 'friend'),
+    generateEntity({ booleanVariable: true }, { from: 2, to: 3 }, 'edge', 'friend'),
+    generateEntity({ booleanVariable: false }, { from: 1, to: 3 }, 'edge', 'friend'),
+    generateEntity({ booleanVariable: false }, { from: 1, to: 2 }, 'edge', 'band'),
   ],
 };
 
@@ -39,7 +38,6 @@ describe('filter', () => {
       const result = filter(network);
       expect(result.nodes.length).toEqual(2);
     });
-
   });
 
   describe('Boolean edge cases', () => {
@@ -104,6 +102,7 @@ describe('filter', () => {
 
     it('orphaned edges are removed', () => {
       const result = filter(network);
+      console.log(network);
       expect(result.edges.length).toEqual(2);
     });
   });
