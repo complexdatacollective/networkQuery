@@ -1,11 +1,21 @@
-const nodeAttributesProperty = require('../nodeAttributesProperty');
+const { entityAttributesProperty, entityPrimaryKeyProperty } = require('@codaco/shared-consts');
 
-const getNodeGenerator = () => {
-  let nodeId = 0;
+const getEntityGenerator = () => {
+  const counts = {
+    node: 0,
+    edge: 0,
+  };
 
-  return (attributes, type = 'person') => {
-    nodeId += 1;
-    return { _uid: nodeId, type, [nodeAttributesProperty]: attributes };
+  return (attributes = {}, modelData = {}, entity = 'node', type = 'person') => {
+    const entityId = counts[entity] + 1;
+    counts[entity] = entityId;
+
+    return {
+      [entityPrimaryKeyProperty]: entityId,
+      type,
+      [entityAttributesProperty]: attributes,
+      ...modelData,
+    };
   };
 };
 
@@ -14,5 +24,5 @@ const generateRuleConfig = (type, options) => ({
   options,
 });
 
-exports.getNodeGenerator = getNodeGenerator;
+exports.getEntityGenerator = getEntityGenerator;
 exports.generateRuleConfig = generateRuleConfig;

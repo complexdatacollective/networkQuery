@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/codaco/networkQuery#readme",
   "devDependencies": {
+    "@codaco/shared-consts": "^0.0.1-alpha.1",
     "eslint": "^7.0.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
@@ -26,6 +27,5 @@
     "testMatch": [
       "<rootDir>/**/*.test.js"
     ]
-  },
-  "dependencies": {}
+  }
 }

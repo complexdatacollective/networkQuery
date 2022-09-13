@@ -1,10 +1,9 @@
-const buildEdgeLookup = require('./buildEdgeLookup');
-const nodePrimaryKeyProperty = require('./nodePrimaryKeyProperty');
+const { entityPrimaryKeyProperty } = require('@codaco/shared-consts');
 const getRule = require('./rules').default;
 
 // remove orphaned edges
 const trimEdges = (network) => {
-  const uids = new Set(network.nodes.map(node => node[nodePrimaryKeyProperty]));
+  const uids = new Set(network.nodes.map(node => node[entityPrimaryKeyProperty]));
 
   const edges = network.edges.filter(
     ({ from, to }) => uids.has(from) && uids.has(to),
@@ -51,20 +50,19 @@ const trimEdges = (network) => {
 
 const filter = ({ rules = [], join } = {}) => {
   const ruleRunners = rules.map(getRule);
-  // use the built-in array methods
-  const ruleIterator = join === 'AND' ? Array.prototype.every : Array.prototype.some;
-
   return (network) => {
-    const edgeMap = buildEdgeLookup(network.edges);
+    // AND === feed result of previous rule into next rule
+    if (join === 'AND') {
+      return ruleRunners.reduce((acc, rule) => rule(acc.nodes, acc.edges), network);
+    }
 
-    const nodes = network.nodes.filter(
-      node => ruleIterator.call(ruleRunners, rule => rule(node, edgeMap)),
-    );
+    // OR === each rule runs on fresh network, and networks are merged at the end
+    const filteredNetworks = ruleRunners.map(rule => rule(network.nodes, network.edges));
 
-    return trimEdges({
-      ...network,
-      nodes,
-    });
+    const resultNodes = filteredNetworks.reduce((acc, { nodes }) => acc.concat(nodes), []);
+    const resultEdges = filteredNetworks.reduce((acc, { edges }) => acc.concat(edges), []);
+
+    return trimEdges({ ...network, nodes: resultNodes, edges: resultEdges });
   };
 };
 
