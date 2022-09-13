@@ -69,9 +69,11 @@ describe('query', () => {
 
     it('works with an empty network', () => {
       const emptyNetwork = { nodes: [], edges: [], ego: {} };
+
       const existsResult = existsQuery(emptyNetwork);
-      const notExistsResult = notExistsQuery(emptyNetwork);
       expect(existsResult).toBe(false);
+
+      const notExistsResult = notExistsQuery(emptyNetwork);
       expect(notExistsResult).toBe(true);
     });
 
@@ -100,14 +102,14 @@ describe('query', () => {
       value: 10,
     });
 
-    const trueAlterRule1 = generateRuleConfig('alter', {
+    const trueNodeRule1 = generateRuleConfig('alter', {
       type: 'person',
       operator: 'LESS_THAN',
       attribute: 'age',
       value: 20,
     });
 
-    const falseAlterRule1 = generateRuleConfig('alter', {
+    const falseNodeRule1 = generateRuleConfig('alter', {
       type: 'person',
       operator: 'LESS_THAN',
       attribute: 'age',
@@ -153,18 +155,18 @@ describe('query', () => {
     describe('alter rules', () => {
       it('an alter rule passes if ANY node matches the rule', () => {
         const successfulQuery = getQuery({
-          rules: [trueAlterRule1],
+          rules: [trueNodeRule1],
         });
 
         expect(successfulQuery(network)).toEqual(true);
 
         const failingQuery = getQuery({
-          rules: [falseAlterRule1],
+          rules: [falseNodeRule1],
         });
 
         expect(failingQuery(network)).toEqual(false);
 
-        const trueAlterRule2 = generateRuleConfig('alter', {
+        const trueNodeRule2 = generateRuleConfig('alter', {
           type: 'person',
           operator: 'EXACTLY',
           attribute: 'likesFish',
@@ -172,7 +174,7 @@ describe('query', () => {
         });
 
         const successfulQuery2 = getQuery({
-          rules: [trueAlterRule2],
+          rules: [trueNodeRule2],
         });
         expect(successfulQuery2(network)).toEqual(true);
       });
@@ -181,7 +183,7 @@ describe('query', () => {
         const successfulQuery = getQuery({
           join: 'AND',
           rules: [
-            trueAlterRule1,
+            trueNodeRule1,
             generateRuleConfig('alter', {
               type: 'person',
               operator: 'EXACTLY',
@@ -198,7 +200,7 @@ describe('query', () => {
         const failingQuery = getQuery({
           join: 'AND',
           rules: [
-            falseAlterRule1,
+            falseNodeRule1,
             generateRuleConfig('alter', {
               type: 'person',
               operator: 'EXACTLY',
@@ -237,6 +239,7 @@ describe('query', () => {
         const andQuery = getQuery({
           join: 'AND',
           rules: [
+            generateRuleConfig('alter', { type: 'person', operator: 'EXISTS' }),
             generateRuleConfig('edge', { type: 'friend', operator: 'EXISTS' }),
             generateRuleConfig('edge', { type: 'band', operator: 'EXISTS' }),
           ],
@@ -264,7 +267,7 @@ describe('query', () => {
       it('when ego and alter/edge rules are joined by AND, they are combined with their own group before those results are then combined again (example pass)', () => {
         const successfulQuery = getQuery({
           join: 'AND',
-          rules: [trueEgoRule1, trueEgoRule2, trueAlterRule1, trueEdgeRule],
+          rules: [trueEgoRule1, trueEgoRule2, trueNodeRule1, trueEdgeRule],
         });
 
         expect(successfulQuery(network)).toEqual(true);
@@ -273,7 +276,7 @@ describe('query', () => {
       it('when ego and alter/edge rules are joined by AND, they are combined with their own group before those results are then combined again (example fail)', () => {
         const successfulQuery = getQuery({
           join: 'AND',
-          rules: [trueEgoRule1, trueEgoRule2, falseAlterRule1, trueEdgeRule],
+          rules: [trueEgoRule1, trueEgoRule2, falseNodeRule1, trueEdgeRule],
         });
 
         expect(successfulQuery(network)).toEqual(false);
@@ -282,7 +285,7 @@ describe('query', () => {
       it('when ego and alter/edge rules are joined by OR, they are combined with their own group before those results are then combined again (example pass)', () => {
         const successfulQuery = getQuery({
           join: 'OR',
-          rules: [trueEgoRule1, falseAlterRule1, trueEdgeRule],
+          rules: [trueEgoRule1, falseNodeRule1, trueEdgeRule],
         });
 
         expect(successfulQuery(network)).toEqual(true);

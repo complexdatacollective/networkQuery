@@ -1,23 +1,88 @@
 const { entityAttributesProperty, entityPrimaryKeyProperty } = require('@codaco/shared-consts');
+const { operators } = require('./predicate');
 
 const predicate = require('./predicate').default;
 
-/**
- * Creates an edge rule, which can be called with `rule(node, edgeMap)`
- *
- * @param {Object} options Rule configuration
- * @param {string} options.type Which edge type are we looking for
- * @param {('EXISTS'|'NOT_EXISTS')} options.operator Check if node has/does not have edge
- */
-const edgeRule = ({ operator, type }) =>
-  (node, edgeMap) => {
-    switch (operator) {
-      case 'EXISTS':
-        return edgeMap[type] && edgeMap[type].has(node[entityPrimaryKeyProperty]);
-      default:
-        return !edgeMap[type] || !edgeMap[type].has(node[entityPrimaryKeyProperty]);
+const singleEdgeRule = ({ type, attribute, operator, value: other }) =>
+  (node, edges) => {
+    const nodeEdges = edges.filter(edge =>
+      edge.from === node[entityPrimaryKeyProperty]
+      || edge.to === node[entityPrimaryKeyProperty]);
+
+    const nodeHasEdgeOfType = nodeEdges.some(edge => edge.type === type);
+
+    if (!attribute) {
+      switch (operator) {
+        case 'EXISTS':
+          return nodeHasEdgeOfType;
+        default:
+          return !nodeHasEdgeOfType;
+      }
     }
+
+    const nodeHasEdgeWithAttribute = nodeHasEdgeOfType
+      && nodeEdges.some(edge =>
+        edge.type === type && predicate(operator)({
+          value: edge[entityAttributesProperty][attribute],
+          other,
+        }));
+
+    return nodeHasEdgeWithAttribute;
   };
+
+const singleNodeRule = ({ type, attribute, operator, value: other }) =>
+  (node) => {
+    if (!attribute) {
+      switch (operator) {
+        case operators.EXISTS:
+          return node.type === type;
+        default:
+          return node.type !== type;
+      }
+    }
+
+    return node.type === type && predicate(operator)({
+      value: node[entityAttributesProperty][attribute],
+      other,
+    });
+  };
+
+
+// Reduce edges to any that match the rule
+// Filter nodes by the resulting edges
+const edgeRule = ({ attribute, operator, type, value: other }) =>
+  (nodes, edges) => {
+    let filteredEdges;
+    // If there is no attribute, we just care about filtering by type
+    if (!attribute) {
+      switch (operator) {
+        case operators.EXISTS:
+          filteredEdges = edges.filter(edge => edge.type === type);
+          break;
+        default:
+          filteredEdges = edges.filter(edge => edge.type !== type);
+      }
+    } else {
+      // If there is an attribute we check that, too.
+      filteredEdges = edges.filter((edge) => {
+        return edge.type === type && predicate(operator)({
+          value: edge[entityAttributesProperty][attribute],
+          other,
+        });
+      });
+    }
+
+    const edgeMap = filteredEdges.flatMap(edge => [edge.from, edge.to]);
+
+    const filteredNodes = nodes.filter(node =>
+      edgeMap.includes(node[entityPrimaryKeyProperty]));
+
+    return {
+      nodes: filteredNodes,
+      edges: filteredEdges,
+    };
+  };
+
 
 /**
  * Creates an alter rule, which can be called with `rule(node)`
@@ -31,14 +96,14 @@ const edgeRule = ({ operator, type }) =>
  * Usage:
  * ```
  * // Check node is of type
- * const rule = alterRule({ type: 'person', operator: 'EXISTS' });
+ * const rule = nodeRule({ type: 'person', operator: operators.EXISTS });
  * const result = rule(node); // returns boolean
  * ```
 * ```
  * // Check node is of type and has attribute that matches the expression
- * const rule = alterRule({
+ * const rule = nodeRule({
  *   type: 'person',
- *   operator: 'EXISTS',
+ *   operator: operators.EXISTS,
  *   attribute:'age',
  *   operator: 'GREATER_THAN',
  *   value: 20
@@ -46,35 +111,53 @@ const edgeRule = ({ operator, type }) =>
  * const result = rule(node); // returns boolean
  * ```
  */
-const alterRule = ({ attribute, operator, type, value: other }) =>
-  (node) => {
+const nodeRule = ({ attribute, operator, type, value: other }) =>
+  (nodes = [], edges = []) => {
+    let filteredNodes;
+    // If there is no attribute, we just care about filtering by type
     if (!attribute) {
       switch (operator) {
-        case 'EXISTS':
-          return node.type === type;
+        case operators.EXISTS:
+          filteredNodes = nodes.filter(node => node.type === type);
+          break;
         default:
-          return node.type !== type;
+          filteredNodes = nodes.filter(node => node.type !== type);
       }
+    } else {
+      // If there is an attribute we check that, too.
+      console.log(nodes, edges);
+      filteredNodes = nodes.filter((node) => {
+        return node.type === type && predicate(operator)({
+          value: node[entityAttributesProperty][attribute],
+          other,
+        });
+      });
     }
 
-    return node.type === type && predicate(operator)({
-      value: node[entityAttributesProperty][attribute],
-      other,
-    });
+    const nodeIds = filteredNodes.map(node =>
+      node[entityPrimaryKeyProperty]);
+
+    const filteredEdges = edges.filter(edge =>
+      nodeIds.includes(edge.from) && nodeIds.includes(edge.to));
+
+    return {
+      nodes: filteredNodes,
+      edges: filteredEdges,
+    };
   };
 
 /**
- * Creates an ego rule, which can be called with `rule(node)`
+ * Creates an ego rule, which can be called with `rule(ego)`
  *
  * @param {Object} options Rule configuration
- * @param {string} options.attribute Which node attribute to assess
+ * @param {string} options.attribute Which ego attribute to assess
  * @param {string} options.operator What predicate to apply to the attribute
- * @param {string} options.value Value to compare the node attribute with
+ * @param {string} options.value Value to compare the ego attribute with
  */
 const egoRule = ({ attribute, operator, value: other }) =>
-  node =>
+  ego =>
     predicate(operator)({
-      value: node[entityAttributesProperty][attribute],
+      value: ego[entityAttributesProperty][attribute],
       other,
     });
 
@@ -99,18 +182,32 @@ const createRule = (type, options, f) => {
  *
  * Usage:
  * ```
- * const rule = getRule({ type: alter, options: { type: 'person', operator: 'EXISTS' } });
- * const result = rule(node, edgeMap); // returns boolean
+ * const rule = getRule({ type: alter, options: { type: 'person', operator: operators.EXISTS } });
+ * const result = rule(node, edges); // returns boolean
  * ```
  */
-const getRule = (ruleConfig) => {
-  switch (ruleConfig.type) {
+const getRule = ({ type, options }) => {
+  switch (type) {
     case 'alter':
-      return createRule('alter', ruleConfig.options, alterRule);
+      return createRule('alter', options, nodeRule);
     case 'edge':
-      return createRule('edge', ruleConfig.options, edgeRule);
+      return createRule('edge', options, edgeRule);
     case 'ego':
-      return createRule('ego', ruleConfig.options, egoRule);
+      return createRule('ego', options, egoRule);
+    default:
+      return () => false;
+  }
+};
+
+// As above, but for rules matching single array or edge
+const getSingleRule = ({ type, options }) => {
+  switch (type) {
+    case 'alter':
+      return createRule('alter', options, singleNodeRule);
+    case 'edge':
+      return createRule('edge', options, singleEdgeRule);
+    case 'ego':
+      return createRule('ego', options, egoRule);
     default:
       return () => false;
   }
@@ -122,6 +219,7 @@ Object.defineProperty(exports, '__esModule', {
 });
 
 exports.default = getRule;
-exports.alter = alterRule;
+exports.getSingleRule = getSingleRule;
+exports.alter = nodeRule;
 exports.ego = egoRule;
 exports.edge = edgeRule;

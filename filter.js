@@ -1,5 +1,4 @@
 const { entityPrimaryKeyProperty } = require('@codaco/shared-consts');
-const buildEdgeLookup = require('./buildEdgeLookup');
 const getRule = require('./rules').default;
 
 // remove orphaned edges
@@ -51,20 +50,28 @@ const trimEdges = (network) => {
 
 const filter = ({ rules = [], join } = {}) => {
   const ruleRunners = rules.map(getRule);
-  // use the built-in array methods
-  const ruleIterator = join === 'AND' ? Array.prototype.every : Array.prototype.some;
-
   return (network) => {
-    const edgeMap = buildEdgeLookup(network.edges);
+    // AND === feed result of previous rule into next rule
+    if (join === 'AND') {
+      return ruleRunners.reduce((acc, rule) => {
+        return rule(acc.nodes, acc.edges);
+      }, network);
+    }
 
-    const nodes = network.nodes.filter(
-      node => ruleIterator.call(ruleRunners, rule => rule(node, edgeMap)),
-    );
-
-    return trimEdges({
-      ...network,
-      nodes,
+    // OR === each rule runs on fresh network, and networks are merged at the end
+    const filteredNetworks = ruleRunners.map((rule) => {
+      return rule(network.nodes, network.edges);
     });
+
+    const nodes = filteredNetworks.reduce((acc, { nodes }) => {
+      return acc.concat(nodes);
+    }, []);
+
+    const edges = filteredNetworks.reduce((acc, { edges }) => {
+      return acc.concat(edges);
+    }, []);
+
+    return trimEdges({ ...network, nodes, edges });
   };
 };
 

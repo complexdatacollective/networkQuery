@@ -1,5 +1,6 @@
 /* eslint-env jest */
 const getFilter = require('../filter').default;
+const { entityAttributesProperty } = require('@codaco/shared-consts');
 const { getEntityGenerator, generateRuleConfig } = require('./helpers');
 
 const generateEntity = getEntityGenerator();
@@ -55,8 +56,10 @@ describe('filter', () => {
       };
 
       const filter = getFilter(filterConfig);
-      const result = filter(network);
-      expect(result.nodes.length).toEqual(1);
+      const { nodes, edges } = filter(network);
+      const names = nodes.map(node => node[entityAttributesProperty].name);
+      expect(names).toEqual(['Theodore']);
+      expect(edges.length).toEqual(0);
 
       const filterConfig2 = {
         rules: [
@@ -97,12 +100,13 @@ describe('filter', () => {
 
     it('matches are combined', () => {
       const result = filter(network);
-      expect(result.nodes.length).toEqual(3);
+      const names = result.nodes.map(node => node[entityAttributesProperty].name);
+      expect(names).toEqual(['William', 'Theodore', 'Phone Box']);
+      expect(result.edges.length).toEqual(2);
     });
 
     it('orphaned edges are removed', () => {
       const result = filter(network);
-      console.log(network);
       expect(result.edges.length).toEqual(2);
     });
   });
@@ -130,12 +134,54 @@ describe('filter', () => {
 
     it('matches are refined', () => {
       const result = filter(network);
-      expect(result.nodes.length).toEqual(1);
+      const names = result.nodes.map(node => node[entityAttributesProperty].name);
+      expect(names).toEqual(['Theodore']);
+      expect(result.edges.length).toEqual(0);
     });
 
     it('orphaned edges are removed', () => {
       const result = filter(network);
       expect(result.edges.length).toEqual(0);
+    });
+  });
+
+  describe('Edges', () => {
+    it('can filter edges by type', () => {
+      const filterConfig = {
+        rules: [
+          generateRuleConfig('edge', {
+            type: 'friend',
+            operator: 'EXISTS',
+          }),
+        ],
+      };
+
+      const filter = getFilter(filterConfig);
+
+      const result = filter(network);
+      const names = result.nodes.map(node => node[entityAttributesProperty].name);
+      expect(names).toEqual(['William', 'Theodore', 'Rufus']);
+      expect(result.edges.length).toEqual(3);
+    });
+
+    // it.todo('can filter edges by type (not)');
+
+    it('can filter edges by attribute', () => {
+      const filterConfig = {
+        rules: [
+          generateRuleConfig('edge', {
+            type: 'friend',
+            operator: 'EXACTLY',
+            attribute: 'booleanVariable',
+            value: true,
+          }),
+        ],
+      };
+
+      const filter = getFilter(filterConfig);
+
+      const result = filter(network);
+      expect(result.edges.length).toEqual(2);
     });
   });
 });
