@@ -52,80 +52,79 @@ describe('rules', () => {
 
 
   describe('alter rules', () => {
-    // describe('faulty rules', () => {
-    // it('correctly handles missing attribute (EXACTLY)', () => {
-    //   const ruleConfig = generateRuleConfig(
-    //     'alter',
-    //     {
-    //       type: 'person',
-    //       attribute: 'missingVariable',
-    //       operator: 'EXACTLY',
-    //       value: 19,
-    //     },
-    //   );
+    describe('faulty rules', () => {
+      it('correctly handles missing attribute (EXACTLY)', () => {
+        const ruleConfig = generateRuleConfig(
+          'alter',
+          {
+            type: 'person',
+            attribute: 'missingVariable',
+            operator: 'EXACTLY',
+            value: 19,
+          },
+        );
 
-    //   const {
-    //     nodes,
-    //   } = runRuleHelper(ruleConfig);
+        const {
+          nodes,
+        } = runRuleHelper(ruleConfig);
 
-    //   expect(nodes.length).toEqual(0);
-    // });
+        expect(nodes.length).toEqual(0);
+      });
 
-    // it('correctly handles missing attribute (NOT)', () => {
-    //   const ruleConfig = generateRuleConfig(
-    //     'alter',
-    //     {
-    //       type: 'person',
-    //       attribute: 'missingVariable',
-    //       operator: 'NOT',
-    //       value: 19,
-    //     },
-    //   );
+      it('correctly handles missing attribute (NOT)', () => {
+        const ruleConfig = generateRuleConfig(
+          'alter',
+          {
+            type: 'person',
+            attribute: 'missingVariable',
+            operator: 'NOT',
+            value: 19,
+          },
+        );
 
-    //   const {
-    //     nodes,
-    //   } = runRuleHelper(ruleConfig);
+        const {
+          nodes,
+        } = runRuleHelper(ruleConfig);
 
-    //   expect(nodes.length).toEqual(3);
-    // });
+        expect(nodes.length).toEqual(3);
+      });
 
-    // it('correctly handles false-like categorical attribute (INCLUDES)', () => {
-    //   const ruleConfig = generateRuleConfig(
-    //     'alter',
-    //     {
-    //       type: 'person',
-    //       attribute: 'categoricalNull',
-    //       operator: 'INCLUDES',
-    //       value: [19],
-    //     },
-    //   );
+      it('correctly handles false-like categorical attribute (INCLUDES)', () => {
+        const ruleConfig = generateRuleConfig(
+          'alter',
+          {
+            type: 'person',
+            attribute: 'categoricalNull',
+            operator: 'INCLUDES',
+            value: [19],
+          },
+        );
 
-    //   const {
-    //     nodes,
-    //   } = runRuleHelper(ruleConfig);
+        const {
+          nodes,
+        } = runRuleHelper(ruleConfig);
 
-    //   expect(nodes.length).toEqual(0);
-    // });
+        expect(nodes.length).toEqual(0);
+      });
 
-    // it('correctly handles false-like categorical attribute (EXCLUDES)', () => {
-    //   const ruleConfig = generateRuleConfig(
-    //     'alter',
-    //     {
-    //       type: 'person',
-    //       attribute: 'categoricalNull',
-    //       operator: 'EXCLUDES',
-    //       value: [19],
-    //     },
-    //   );
+      it('correctly handles false-like categorical attribute (EXCLUDES)', () => {
+        const ruleConfig = generateRuleConfig(
+          'alter',
+          {
+            type: 'person',
+            attribute: 'categoricalNull',
+            operator: 'EXCLUDES',
+            value: [19],
+          },
+        );
 
-    //   const {
-    //     nodes,
-    //   } = runRuleHelper(ruleConfig);
+        const {
+          nodes,
+        } = runRuleHelper(ruleConfig);
 
-    //   expect(nodes.length).toEqual(3);
-    // });
-    // });
-
+        expect(nodes.length).toEqual(3);
+      });
+    });
 
     describe('type rules', () => {
       it('EXISTS', () => {
