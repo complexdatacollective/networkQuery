@@ -47,7 +47,6 @@ const singleNodeRule = ({ type, attribute, operator, value: other }) =>
     });
   };
 
-
 // Reduce edges to any that match the rule
 // Filter nodes by the resulting edges
 const edgeRule = ({ attribute, operator, type, value: other }) =>
@@ -64,12 +63,10 @@ const edgeRule = ({ attribute, operator, type, value: other }) =>
       }
     } else {
       // If there is an attribute we check that, too.
-      filteredEdges = edges.filter((edge) => {
-        return edge.type === type && predicate(operator)({
-          value: edge[entityAttributesProperty][attribute],
-          other,
-        });
-      });
+      filteredEdges = edges.filter(edge => edge.type === type && predicate(operator)({
+        value: edge[entityAttributesProperty][attribute],
+        other,
+      }));
     }
 
     const edgeMap = filteredEdges.flatMap(edge => [edge.from, edge.to]);
@@ -125,13 +122,10 @@ const nodeRule = ({ attribute, operator, type, value: other }) =>
       }
     } else {
       // If there is an attribute we check that, too.
-      console.log(nodes, edges);
-      filteredNodes = nodes.filter((node) => {
-        return node.type === type && predicate(operator)({
-          value: node[entityAttributesProperty][attribute],
-          other,
-        });
-      });
+      filteredNodes = nodes.filter(node => node.type === type && predicate(operator)({
+        value: node[entityAttributesProperty][attribute],
+        other,
+      }));
     }
 
     const nodeIds = filteredNodes.map(node =>

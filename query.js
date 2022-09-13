@@ -25,13 +25,6 @@ const groupByType = (acc, rule) => {
   };
 };
 
-const ruleWithBooleanResult = (result) => {
-  if (!result) { return false; }
-  if (result.nodes.length === 0 && result.edges.length === 0) { return false; }
-
-  return true;
-};
-
 /**
  * Returns a method which can query the network.
  * The returned method takes a network object as an argument and returns a boolean.

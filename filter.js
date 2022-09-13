@@ -53,25 +53,16 @@ const filter = ({ rules = [], join } = {}) => {
   return (network) => {
     // AND === feed result of previous rule into next rule
     if (join === 'AND') {
-      return ruleRunners.reduce((acc, rule) => {
-        return rule(acc.nodes, acc.edges);
-      }, network);
+      return ruleRunners.reduce((acc, rule) => rule(acc.nodes, acc.edges), network);
     }
 
     // OR === each rule runs on fresh network, and networks are merged at the end
-    const filteredNetworks = ruleRunners.map((rule) => {
-      return rule(network.nodes, network.edges);
-    });
+    const filteredNetworks = ruleRunners.map(rule => rule(network.nodes, network.edges));
 
-    const nodes = filteredNetworks.reduce((acc, { nodes }) => {
-      return acc.concat(nodes);
-    }, []);
+    const resultNodes = filteredNetworks.reduce((acc, { nodes }) => acc.concat(nodes), []);
+    const resultEdges = filteredNetworks.reduce((acc, { edges }) => acc.concat(edges), []);
 
-    const edges = filteredNetworks.reduce((acc, { edges }) => {
-      return acc.concat(edges);
-    }, []);
-
-    return trimEdges({ ...network, nodes, edges });
+    return trimEdges({ ...network, nodes: resultNodes, edges: resultEdges });
   };
 };
 
