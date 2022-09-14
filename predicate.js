@@ -78,11 +78,21 @@ const predicate = operator =>
       }
       case operators.INCLUDES: {
         if (!value) { return false; } // ord/cat vars are initialised to null
-        return value.some(v => other.includes(v));
+
+        if (isArray(value)) {
+          return value.some(v => other.includes(v));
+        }
+
+        return other.includes(value);
       }
       case operators.EXCLUDES: {
         if (!value) { return true; } // ord/cat vars are initialised to null
-        return !value.some(v => other.includes(v));
+
+        if (isArray(value)) {
+          return !value.some(v => other.includes(v));
+        }
+
+        return !other.includes(value);
       }
       case operators.EXISTS:
         return !isNull(value);
