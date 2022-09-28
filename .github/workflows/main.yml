@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
 
   # Allows you to run this workflow manually from the Actions tab
@@ -18,15 +18,15 @@ jobs:
       # Set node version
       - uses: actions/setup-node@v2
         with:
-          node-version: '12.14.1'
+          node-version: "16"
       - name: Set NPM 7
-        run: npm install -g npm@7.6.3
+        run: npm install -g npm@8.3.1
       # Cache node_modules
       - uses: actions/cache@v2
         env:
           cache-name: cache-node-modules
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install node modules
