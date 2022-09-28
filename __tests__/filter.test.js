@@ -204,7 +204,7 @@ describe('filter', () => {
       expect(result.edges.length).toEqual(3);
     });
 
-    // it.todo('can filter edges by type (not)');
+    it.todo('can filter edges by type (not)');
 
     it('can filter edges by attribute', () => {
       const filterConfig = {
