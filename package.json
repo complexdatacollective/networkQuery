@@ -5,7 +5,7 @@
   "main": "query.js",
   "scripts": {
     "lint": "eslint *.js",
-    "test": "jest"
+    "test": "jest --transformIgnorePatterns \"node_modules/(?!@codaco/shared-consts)/\""
   },
   "repository": {
     "type": "git",
