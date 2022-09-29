@@ -48,51 +48,77 @@ const countOperators = {
  * ```
  */
 const predicate = operator =>
-  ({ value, other }) => {
+  ({ value, other: variableValue }) => {
     switch (operator) {
       case operators.GREATER_THAN:
       case countOperators.COUNT_GREATER_THAN:
-        return value > other;
+        return value > variableValue;
       case operators.LESS_THAN:
       case countOperators.COUNT_LESS_THAN:
-        return value < other;
+        return value < variableValue;
       case operators.GREATER_THAN_OR_EQUAL:
       case countOperators.COUNT_GREATER_THAN_OR_EQUAL:
-        return value >= other;
+        return value >= variableValue;
       case operators.LESS_THAN_OR_EQUAL:
       case countOperators.COUNT_LESS_THAN_OR_EQUAL:
-        return value <= other;
+        return value <= variableValue;
       case operators.EXACTLY:
       case countOperators.COUNT:
-        return isEqual(value, other);
+        return isEqual(value, variableValue);
       case operators.NOT:
       case countOperators.COUNT_NOT:
-        return !isEqual(value, other);
+        return !isEqual(value, variableValue);
       case operators.CONTAINS: {
-        const regexp = new RegExp(other);
+        const regexp = new RegExp(variableValue);
         return regexp.test(value);
       }
       case operators.DOES_NOT_CONTAIN: {
-        const regexp = new RegExp(other);
+        const regexp = new RegExp(variableValue);
         return !regexp.test(value);
       }
+      /**
+       * WARNING: INCLUDES/EXCLUDES are complicated!
+       *
+       * value can be a string, an integer, or an array
+       * variableValue can be a string, an integer, or an array
+       *
+       * If you change these, make sure you test all the cases!
+       */
       case operators.INCLUDES: {
         if (!value) { return false; } // ord/cat vars are initialised to null
 
-        if (isArray(value)) {
-          return value.some(v => other.includes(v));
+        if (isArray(variableValue)) {
+          if (isArray(value)) {
+            return variableValue.every(v => value.includes(v));
+          }
+
+          return variableValue.includes(value);
         }
 
-        return other.includes(value);
+        if (isArray(value)) {
+          return value.includes(variableValue);
+        }
+
+        // both are strings or integers
+        return value === variableValue;
       }
       case operators.EXCLUDES: {
         if (!value) { return true; } // ord/cat vars are initialised to null
 
-        if (isArray(value)) {
-          return !value.some(v => other.includes(v));
+        if (isArray(variableValue)) {
+          if (isArray(value)) {
+            return variableValue.every(v => !value.includes(v));
+          }
+
+          return !variableValue.includes(value);
         }
 
-        return !other.includes(value);
+        if (isArray(value)) {
+          return !value.includes(variableValue);
+        }
+
+        // both are strings or integers
+        return value !== variableValue;
       }
       case operators.EXISTS:
         return !isNull(value);
@@ -104,19 +130,19 @@ const predicate = operator =>
         return value === 0;
       case operators.OPTIONS_GREATER_THAN: {
         if (!isArray(value)) { return false; }
-        return value.length > other;
+        return value.length > variableValue;
       }
       case operators.OPTIONS_LESS_THAN: {
         if (!isArray(value)) { return false; }
-        return value.length < other;
+        return value.length < variableValue;
       }
       case operators.OPTIONS_EQUALS: {
         if (!isArray(value)) { return false; }
-        return value.length === other;
+        return value.length === variableValue;
       }
       case operators.OPTIONS_NOT_EQUALS: {
         if (!isArray(value)) { return false; }
-        return value.length !== other;
+        return value.length !== variableValue;
       }
       default:
         return false;
