@@ -24,5 +24,31 @@ const generateRuleConfig = (type, options) => ({
   options,
 });
 
+// Function that checks if a string is a valid date in the format YYYY-MM-DD, YYYY-MM, or YYYY
+// and converts it to a Date object
+const isValidDate = (dateString) => {
+  const dateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
+  const yearMonthRegex = /^(\d{4})-(\d{2})$/;
+  const yearRegex = /^(\d{4})$/;
+
+  if (dateRegex.test(dateString)) {
+    const [year, month, day] = dateString.split('-');
+    return new Date(year, month - 1, day);
+  }
+
+  if (yearMonthRegex.test(dateString)) {
+    const [year, month] = dateString.split('-');
+    return new Date(year, month - 1);
+  }
+
+  if (yearRegex.test(dateString)) {
+    const [year] = dateString.split('-');
+    return new Date(year);
+  }
+
+  return false;
+};
+
+exports.isValidDate = isValidDate;
 exports.getEntityGenerator = getEntityGenerator;
 exports.generateRuleConfig = generateRuleConfig;

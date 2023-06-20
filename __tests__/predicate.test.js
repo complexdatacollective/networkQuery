@@ -3,142 +3,422 @@ const predicate = require('../predicate').default;
 const operators = require('../predicate').operators;
 const countOperators = require('../predicate').countOperators;
 
+/**
+ * Should cover all variable types:
+ * - number
+ * - string
+ * - date
+ * - boolean
+ * - categorical
+ * - ordinal
+ * - scalar
+ */
+
 describe('predicate', () => {
   it('default', () => {
     expect(predicate(null)({ value: null, other: null })).toBe(false);
   });
 
   describe('operators', () => {
-    it('GREATER_THAN', () => {
-      expect(
-        predicate(operators.GREATER_THAN)({ value: 1.5, other: 1 }),
-      ).toBe(true);
-      expect(
-        predicate(operators.GREATER_THAN)({ value: 2, other: 2 }),
-      ).toBe(false);
+    describe('GREATER_THAN', () => {
+      it('number', () => {
+        expect(
+          predicate(operators.GREATER_THAN)({ value: 1.5, other: 1 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.GREATER_THAN)({ value: 2, other: 2 }),
+        ).toBe(false);
+      });
+      it('date', () => {
+        expect(
+          predicate(operators.GREATER_THAN)({ value: '2018-01-01', other: '2017-01-01' }),
+        ).toBe(true);
+        expect(
+          predicate(operators.GREATER_THAN)({ value: '2018-01-01', other: '2018-01-01' }),
+        ).toBe(false);
+      });
+
+      it('scalar', () => {
+        expect(
+          predicate(operators.GREATER_THAN)({ value: 0.5, other: 0.3 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.GREATER_THAN)({ value: 0.1, other: 0.2 }),
+        ).toBe(false);
+      });
     });
 
-    it('LESS_THAN', () => {
-      expect(
-        predicate(operators.LESS_THAN)({ value: 1, other: 1.5 }),
-      ).toBe(true);
-      expect(
-        predicate(operators.LESS_THAN)({ value: 2, other: 2 }),
-      ).toBe(false);
+    describe('LESS_THAN', () => {
+      it('number', () => {
+        expect(
+          predicate(operators.LESS_THAN)({ value: 1, other: 1.5 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.LESS_THAN)({ value: 2, other: 2 }),
+        ).toBe(false);
+      });
+      it('date', () => {
+        expect(
+          predicate(operators.LESS_THAN)({ value: '2017-01-01', other: '2018-01-01' }),
+        ).toBe(true);
+        expect(
+          predicate(operators.LESS_THAN)({ value: '2018-01-01', other: '2018-01-01' }),
+        ).toBe(false);
+      });
+
+      it('scalar', () => {
+        expect(
+          predicate(operators.LESS_THAN)({ value: 0.3, other: 0.5 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.LESS_THAN)({ value: 0.2, other: 0.1 }),
+        ).toBe(false);
+      });
     });
 
-    it('GREATER_THAN_OR_EQUAL', () => {
-      expect(
-        predicate(operators.GREATER_THAN_OR_EQUAL)({ value: 1.5, other: 1 }),
-      ).toBe(true);
-      expect(
-        predicate(operators.GREATER_THAN_OR_EQUAL)({ value: 2, other: 2 }),
-      ).toBe(true);
-      expect(
-        predicate(operators.GREATER_THAN_OR_EQUAL)({ value: 2, other: 3 }),
-      ).toBe(false);
+    describe('GREATER_THAN_OR_EQUAL', () => {
+      it('number', () => {
+        expect(
+          predicate(operators.GREATER_THAN_OR_EQUAL)({ value: 1.5, other: 1 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.GREATER_THAN_OR_EQUAL)({ value: 2, other: 2 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.GREATER_THAN_OR_EQUAL)({ value: 2, other: 3 }),
+        ).toBe(false);
+      });
+      it('date', () => {
+        expect(
+          predicate(operators.GREATER_THAN_OR_EQUAL)({ value: '2018-01-01', other: '2017-01-01' }),
+        ).toBe(true);
+        expect(
+          predicate(operators.GREATER_THAN_OR_EQUAL)({ value: '2018-01-01', other: '2018-01-01' }),
+        ).toBe(true);
+        expect(
+          predicate(operators.GREATER_THAN_OR_EQUAL)({ value: '2018-01-01', other: '2019-01-01' }),
+        ).toBe(false);
+      });
+
+      it('scalar', () => {
+        expect(
+          predicate(operators.GREATER_THAN_OR_EQUAL)({ value: 0.5, other: 0.3 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.GREATER_THAN_OR_EQUAL)({ value: 0.2, other: 0.2 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.GREATER_THAN_OR_EQUAL)({ value: 0.1, other: 0.2 }),
+        ).toBe(false);
+      });
     });
 
-    it('LESS_THAN_OR_EQUAL', () => {
-      expect(
-        predicate(operators.LESS_THAN_OR_EQUAL)({ value: 1, other: 1.5 }),
-      ).toBe(true);
-      expect(
-        predicate(operators.LESS_THAN_OR_EQUAL)({ value: 2, other: 2 }),
-      ).toBe(true);
-      expect(
-        predicate(operators.LESS_THAN_OR_EQUAL)({ value: 3, other: 2 }),
-      ).toBe(false);
+    describe('LESS_THAN_OR_EQUAL', () => {
+      it('number', () => {
+        expect(
+          predicate(operators.LESS_THAN_OR_EQUAL)({ value: 1, other: 1.5 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.LESS_THAN_OR_EQUAL)({ value: 2, other: 2 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.LESS_THAN_OR_EQUAL)({ value: 3, other: 2 }),
+        ).toBe(false);
+      });
+
+      it('date', () => {
+        expect(
+          predicate(operators.LESS_THAN_OR_EQUAL)({ value: '2017-01-01', other: '2018-01-01' }),
+        ).toBe(true);
+        expect(
+          predicate(operators.LESS_THAN_OR_EQUAL)({ value: '2018-01-01', other: '2018-01-01' }),
+        ).toBe(true);
+        expect(
+          predicate(operators.LESS_THAN_OR_EQUAL)({ value: '2019-01-01', other: '2018-01-01' }),
+        ).toBe(false);
+      });
+
+      it('scalar', () => {
+        expect(
+          predicate(operators.LESS_THAN_OR_EQUAL)({ value: 0.3, other: 0.5 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.LESS_THAN_OR_EQUAL)({ value: 0.2, other: 0.2 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.LESS_THAN_OR_EQUAL)({ value: 0.2, other: 0.1 }),
+        ).toBe(false);
+      });
     });
 
-    it('EXACTLY', () => {
-      expect(
-        predicate(operators.EXACTLY)({ value: 1, other: 1 }),
-      ).toBe(true);
-      expect(
-        predicate(operators.EXACTLY)({ value: 2, other: 1 }),
-      ).toBe(false);
-      expect(
-        predicate(operators.EXACTLY)({ value: null, other: 0 }),
-      ).toBe(false);
-      expect(
-        predicate(operators.EXACTLY)({ value: 'word', other: 'word' }),
-      ).toBe(true);
-      expect(
-        predicate(operators.EXACTLY)({ value: 'not word', other: 'word' }),
-      ).toBe(false);
-      expect(
-        predicate(operators.EXACTLY)({ value: null, other: 'word' }),
-      ).toBe(false);
-      expect(
-        predicate(operators.EXACTLY)({ value: true, other: true }),
-      ).toBe(true);
-      expect(
-        predicate(operators.EXACTLY)({ value: false, other: true }),
-      ).toBe(false);
-      expect(
-        predicate(operators.EXACTLY)({ value: null, other: true }),
-      ).toBe(false);
-      expect(
-        predicate(operators.EXACTLY)({ value: true, other: false }),
-      ).toBe(false);
-      expect(
-        predicate(operators.EXACTLY)({ value: false, other: false }),
-      ).toBe(true);
-      expect(
-        predicate(operators.EXACTLY)({ value: null, other: false }),
-      ).toBe(false);
-      expect(
-        predicate(operators.EXACTLY)({ value: false, other: null }),
-      ).toBe(false);
+    describe('EXACTLY', () => {
+      it('number', () => {
+        expect(
+          predicate(operators.EXACTLY)({ value: 1, other: 1 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.EXACTLY)({ value: 2, other: 1 }),
+        ).toBe(false);
+        expect(
+          predicate(operators.EXACTLY)({ value: null, other: 0 }),
+        ).toBe(false);
+      });
+      it('string', () => {
+        expect(
+          predicate(operators.EXACTLY)({ value: 'word', other: 'word' }),
+        ).toBe(true);
+        expect(
+          predicate(operators.EXACTLY)({ value: 'not word', other: 'word' }),
+        ).toBe(false);
+        expect(
+          predicate(operators.EXACTLY)({ value: null, other: 'word' }),
+        ).toBe(false);
+      });
+      it('boolean', () => {
+        expect(
+          predicate(operators.EXACTLY)({ value: true, other: true }),
+        ).toBe(true);
+        expect(
+          predicate(operators.EXACTLY)({ value: false, other: true }),
+        ).toBe(false);
+        expect(
+          predicate(operators.EXACTLY)({ value: null, other: true }),
+        ).toBe(false);
+        expect(
+          predicate(operators.EXACTLY)({ value: true, other: false }),
+        ).toBe(false);
+        expect(
+          predicate(operators.EXACTLY)({ value: false, other: false }),
+        ).toBe(true);
+        expect(
+          predicate(operators.EXACTLY)({ value: null, other: false }),
+        ).toBe(false);
+        expect(
+          predicate(operators.EXACTLY)({ value: false, other: null }),
+        ).toBe(false);
+      });
+
+      it('categorical', () => {
+        expect(
+          predicate(operators.EXACTLY)({ value: ['f'], other: ['f'] }),
+        ).toBe(true);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: ['f'], other: ['f', 'm'] }),
+        ).toBe(false);
+
+        // Order shouldn't matter
+        expect(
+          predicate(operators.EXACTLY)({ value: ['f', 'm'], other: ['f', 'm'] }),
+        ).toBe(true);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: ['m', 'f'], other: ['f', 'm'] }),
+        ).toBe(true);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: [1], other: [1] }),
+        ).toBe(true);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: [1], other: [1, 2] }),
+        ).toBe(false);
+      });
+
+      it('ordinal', () => {
+        expect(
+          predicate(operators.EXACTLY)({ value: 'f', other: 'f' }),
+        ).toBe(true);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: 'f', other: 'm' }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: 1, other: 1 }),
+        ).toBe(true);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: 1, other: 2 }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: true, other: true }),
+        ).toBe(true);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: true, other: false }),
+        ).toBe(false);
+      });
+
+      it('scalar', () => {
+        expect(
+          predicate(operators.EXACTLY)({ value: 1, other: 1 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.EXACTLY)({ value: 0.5, other: 1 }),
+        ).toBe(false);
+      });
+
+      it('date', () => {
+        expect(
+          predicate(operators.EXACTLY)({ value: '2012-05-18', other: '2012-05-18' }),
+        ).toBe(true);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: '2012-05-18', other: '2012-05-19' }),
+        ).toBe(false);
+      });
     });
 
-    it('NOT', () => {
-      expect(
-        predicate(operators.NOT)({ value: 1, other: 1 }),
-      ).toBe(false);
-      expect(
-        predicate(operators.NOT)({ value: 2, other: 1 }),
-      ).toBe(true);
-      expect(
-        predicate(operators.NOT)({ value: null, other: false }),
-      ).toBe(true);
-      expect(
-        predicate(operators.NOT)({ value: null, other: true }),
-      ).toBe(true);
-      expect(
-        predicate(operators.NOT)({ value: false, other: null }),
-      ).toBe(true);
-      expect(
-        predicate(operators.NOT)({ value: false, other: true }),
-      ).toBe(true);
-      expect(
-        predicate(operators.NOT)({ value: true, other: false }),
-      ).toBe(true);
+    describe('NOT', () => {
+      it('number', () => {
+        expect(
+          predicate(operators.NOT)({ value: 1, other: 1 }),
+        ).toBe(false);
+        expect(
+          predicate(operators.NOT)({ value: 2, other: 1 }),
+        ).toBe(true);
+        expect(
+          predicate(operators.NOT)({ value: null, other: 0 }),
+        ).toBe(true);
+      });
+
+      it('string', () => {
+        expect(
+          predicate(operators.NOT)({ value: 'word', other: 'word' }),
+        ).toBe(false);
+        expect(
+          predicate(operators.NOT)({ value: 'not word', other: 'word' }),
+        ).toBe(true);
+        expect(
+          predicate(operators.NOT)({ value: null, other: 'word' }),
+        ).toBe(true);
+      });
+
+      it('boolean', () => {
+        expect(
+          predicate(operators.NOT)({ value: true, other: true }),
+        ).toBe(false);
+        expect(
+          predicate(operators.NOT)({ value: false, other: true }),
+        ).toBe(true);
+        expect(
+          predicate(operators.NOT)({ value: null, other: true }),
+        ).toBe(true);
+        expect(
+          predicate(operators.NOT)({ value: true, other: false }),
+        ).toBe(true);
+        expect(
+          predicate(operators.NOT)({ value: false, other: false }),
+        ).toBe(false);
+        expect(
+          predicate(operators.NOT)({ value: null, other: false }),
+        ).toBe(true);
+        expect(
+          predicate(operators.NOT)({ value: false, other: null }),
+        ).toBe(true);
+      });
+
+      it('categorical', () => {
+        expect(
+          predicate(operators.NOT)({ value: ['f'], other: ['f'] }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.NOT)({ value: ['f'], other: ['f', 'm'] }),
+        ).toBe(true);
+
+        // Order shouldn't matter
+        expect(
+          predicate(operators.NOT)({ value: ['f', 'm'], other: ['f', 'm'] }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.NOT)({ value: ['m', 'f'], other: ['f', 'm'] }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.NOT)({ value: [1], other: [1] }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.NOT)({ value: [1], other: [1, 2] }),
+        ).toBe(true);
+      });
+
+      it('ordinal', () => {
+        expect(
+          predicate(operators.NOT)({ value: 'f', other: 'f' }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.NOT)({ value: 'f', other: 'm' }),
+        ).toBe(true);
+
+        expect(
+          predicate(operators.NOT)({ value: 1, other: 1 }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.NOT)({ value: 1, other: 2 }),
+        ).toBe(true);
+
+        expect(
+          predicate(operators.NOT)({ value: true, other: true }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.NOT)({ value: true, other: false }),
+        ).toBe(true);
+      });
+
+      it('scalar', () => {
+        expect(
+          predicate(operators.NOT)({ value: 1, other: 1 }),
+        ).toBe(false);
+        expect(
+          predicate(operators.NOT)({ value: 0.5, other: 1 }),
+        ).toBe(true);
+      });
+
+      it('date', () => {
+        expect(
+          predicate(operators.NOT)({ value: '2012-05-18', other: '2012-05-18' }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.NOT)({ value: '2012-05-18', other: '2012-05-19' }),
+        ).toBe(true);
+      });
     });
 
-    it('CONTAINS', () => {
-      expect(
-        predicate(operators.CONTAINS)({ value: 'word', other: 'wo' }),
-      ).toBe(true);
-      expect(
-        predicate(operators.CONTAINS)({ value: 'word', other: '^w' }),
-      ).toBe(true);
-      expect(
-        predicate(operators.CONTAINS)({ value: 'word', other: '^g' }),
-      ).toBe(false);
+    describe('CONTAINS', () => {
+      it('string', () => {
+        expect(
+          predicate(operators.CONTAINS)({ value: 'word', other: 'wo' }),
+        ).toBe(true);
+        expect(
+          predicate(operators.CONTAINS)({ value: 'word', other: '^w' }),
+        ).toBe(true);
+        expect(
+          predicate(operators.CONTAINS)({ value: 'word', other: '^g' }),
+        ).toBe(false);
+      });
     });
 
-    it('DOES_NOT_CONTAIN', () => {
-      expect(
-        predicate(operators.DOES_NOT_CONTAIN)({ value: 'word', other: 'go' }),
-      ).toBe(true);
-      expect(
-        predicate(operators.DOES_NOT_CONTAIN)({ value: 'word', other: '^g' }),
-      ).toBe(true);
-      expect(
-        predicate(operators.DOES_NOT_CONTAIN)({ value: 'word', other: '^w' }),
-      ).toBe(false);
+    describe('DOES_NOT_CONTAIN', () => {
+      it('string', () => {
+        expect(
+          predicate(operators.DOES_NOT_CONTAIN)({ value: 'word', other: 'go' }),
+        ).toBe(true);
+        expect(
+          predicate(operators.DOES_NOT_CONTAIN)({ value: 'word', other: '^g' }),
+        ).toBe(true);
+        expect(
+          predicate(operators.DOES_NOT_CONTAIN)({ value: 'word', other: '^w' }),
+        ).toBe(false);
+      });
     });
 
     it('EXISTS', () => {
