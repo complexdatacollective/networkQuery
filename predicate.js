@@ -67,6 +67,10 @@ const predicate = operator =>
         if (isArray(value) && isArray(variableValue)) {
           return isEqual(value.sort(), variableValue.sort());
         }
+        // if variableValue is an array, check if it is array with single item which == value
+        if (isArray(variableValue) && variableValue.length === 1) {
+          return isEqual(value, variableValue[0]);
+        }
         return isEqual(value, variableValue);
       case countOperators.COUNT:
         return isEqual(value, variableValue);

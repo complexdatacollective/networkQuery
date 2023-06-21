@@ -223,6 +223,31 @@ describe('predicate', () => {
         expect(
           predicate(operators.EXACTLY)({ value: [1], other: [1, 2] }),
         ).toBe(false);
+
+        // Pass when attribute value is array with single item and single item is value
+        expect(
+          predicate(operators.EXACTLY)({ value: 'f', other: ['f'] }),
+        ).toBe(true);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: 'f', other: ['m'] }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: 1, other: [1] }),
+        ).toBe(true);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: 1, other: [2] }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: 'f', other: ['f', 'm'] }),
+        ).toBe(false);
+
+        expect(
+          predicate(operators.EXACTLY)({ value: 1, other: [1, 2] }),
+        ).toBe(false);
       });
 
       it('ordinal', () => {
