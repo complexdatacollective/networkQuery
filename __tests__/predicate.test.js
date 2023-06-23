@@ -225,39 +225,39 @@ describe('predicate', () => {
         ).toBe(false);
 
         /**
-         * Expect true when attributeValue is an array with a single item
-         * and value is that single item
+         * Expect true when value is an array with a single item
+         * and varaiableValue is that single item
          *
-         * Expect false if attributeValue is an array with multiple items
-         * and value is a single item
+         * Expect false if value is an array with multiple items
+         * and variableValue is a single item
          *
-         * Expect false if attributeValue is an array with single item
-         * and value is a different single item
+         * Expect false if value is an array with single item
+         * and variableValue is a different single item
          *
-         * This checks that the bugfix in predicate is working
+         * This checks that the categorical variable skip logic bugfix in predicate is working
          */
         expect(
-          predicate(operators.EXACTLY)({ value: 'f', other: ['f'] }),
+          predicate(operators.EXACTLY)({ value: ['f'], other: 'f' }),
         ).toBe(true);
 
         expect(
-          predicate(operators.EXACTLY)({ value: 'f', other: ['m'] }),
+          predicate(operators.EXACTLY)({ value: ['f'], other: 'm' }),
         ).toBe(false);
 
         expect(
-          predicate(operators.EXACTLY)({ value: 1, other: [1] }),
+          predicate(operators.EXACTLY)({ value: [1], other: 1 }),
         ).toBe(true);
 
         expect(
-          predicate(operators.EXACTLY)({ value: 1, other: [2] }),
+          predicate(operators.EXACTLY)({ value: [1], other: 2 }),
         ).toBe(false);
 
         expect(
-          predicate(operators.EXACTLY)({ value: 'f', other: ['f', 'm'] }),
+          predicate(operators.EXACTLY)({ value: ['f', 'm'], other: 'f' }),
         ).toBe(false);
 
         expect(
-          predicate(operators.EXACTLY)({ value: 1, other: [1, 2] }),
+          predicate(operators.EXACTLY)({ value: [1, 2], other: 1 }),
         ).toBe(false);
       });
 
