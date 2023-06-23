@@ -224,7 +224,18 @@ describe('predicate', () => {
           predicate(operators.EXACTLY)({ value: [1], other: [1, 2] }),
         ).toBe(false);
 
-        // Pass when attribute value is array with single item and single item is value
+        /**
+         * Expect true when attributeValue is an array with a single item
+         * and value is that single item
+         *
+         * Expect false if attributeValue is an array with multiple items
+         * and value is a single item
+         *
+         * Expect false if attributeValue is an array with single item
+         * and value is a different single item
+         *
+         * This checks that the bugfix in predicate is working
+         */
         expect(
           predicate(operators.EXACTLY)({ value: 'f', other: ['f'] }),
         ).toBe(true);

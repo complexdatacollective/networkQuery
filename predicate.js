@@ -67,7 +67,16 @@ const predicate = operator =>
         if (isArray(value) && isArray(variableValue)) {
           return isEqual(value.sort(), variableValue.sort());
         }
-        // if variableValue is an array, check if it is array with single item which == value
+
+        /**
+        * If variableValue is an array, check if it is array with single item
+        * which == value and return true
+        *
+        * This fixes a bug where categorical variable rules using exists/not were returning false
+        * because the variableValue was an array with a single item, but the value was not
+        *
+        * e.g. varaiableValue = ['F'], value = 'F' will return true
+        */
         if (isArray(variableValue) && variableValue.length === 1) {
           return isEqual(value, variableValue[0]);
         }
