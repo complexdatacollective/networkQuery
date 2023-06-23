@@ -6,18 +6,18 @@ const {
 
 // operators list
 const operators = {
+  GREATER_THAN: 'GREATER_THAN',
+  LESS_THAN: 'LESS_THAN',
+  GREATER_THAN_OR_EQUAL: 'GREATER_THAN_OR_EQUAL',
+  LESS_THAN_OR_EQUAL: 'LESS_THAN_OR_EQUAL',
   EXACTLY: 'EXACTLY',
-  INCLUDES: 'INCLUDES',
-  EXCLUDES: 'EXCLUDES',
-  EXISTS: 'EXISTS',
-  NOT_EXISTS: 'NOT_EXISTS',
   NOT: 'NOT',
   CONTAINS: 'CONTAINS',
   DOES_NOT_CONTAIN: 'DOES_NOT_CONTAIN',
-  GREATER_THAN: 'GREATER_THAN',
-  GREATER_THAN_OR_EQUAL: 'GREATER_THAN_OR_EQUAL',
-  LESS_THAN: 'LESS_THAN',
-  LESS_THAN_OR_EQUAL: 'LESS_THAN_OR_EQUAL',
+  EXISTS: 'EXISTS',
+  NOT_EXISTS: 'NOT_EXISTS',
+  INCLUDES: 'INCLUDES',
+  EXCLUDES: 'EXCLUDES',
   OPTIONS_GREATER_THAN: 'OPTIONS_GREATER_THAN',
   OPTIONS_LESS_THAN: 'OPTIONS_LESS_THAN',
   OPTIONS_EQUALS: 'OPTIONS_EQUALS',
@@ -63,9 +63,32 @@ const predicate = operator =>
       case countOperators.COUNT_LESS_THAN_OR_EQUAL:
         return value <= variableValue;
       case operators.EXACTLY:
+        // If value and variableValue are both arrays, sort them so that we can compare them
+        if (isArray(value) && isArray(variableValue)) {
+          return isEqual(value.sort(), variableValue.sort());
+        }
+
+        /**
+        * If value is an array, check if it is array with single item
+        * which == variableValue and return true
+        *
+        * This fixes a bug where categorical variable rules using exists/not were returning false
+        * because the value was an array with a single item, but the variableValue was not
+        *
+        * e.g. value = ['F'], variableValue = 'F' will return true
+        */
+        if (isArray(value) && value.length === 1) {
+          return isEqual(value[0], variableValue);
+        }
+        return isEqual(value, variableValue);
       case countOperators.COUNT:
         return isEqual(value, variableValue);
       case operators.NOT:
+        // If value and variableValue are both arrays, sort them so that we can compare them
+        if (isArray(value) && isArray(variableValue)) {
+          return !isEqual(value.sort(), variableValue.sort());
+        }
+        return !isEqual(value, variableValue);
       case countOperators.COUNT_NOT:
         return !isEqual(value, variableValue);
       case operators.CONTAINS: {
